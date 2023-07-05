@@ -5,13 +5,13 @@ from wtforms.validators import InputRequired, Length, ValidationError
 
 from passlib.hash import pbkdf2_sha256
 
-def validate_password(bannedLetter="a"):
+def validate_password():
     message = 'Username or password is incorrect'
 
     def _sqlGetHash(username):
         conn = sqlite3.connect('Lib\sql\musicSQL.db')
         return conn.execute('SELECT password FROM Users where UserName = ?',
-                        (username,)).fetchone()[0]
+                        (username,)).fetchone()
 
     def _validatepassword(form, field):
         
@@ -20,7 +20,7 @@ def validate_password(bannedLetter="a"):
         if passwordHash == None:
             raise(ValidationError(message))
 
-        if not pbkdf2_sha256.verify(form.password.data, passwordHash):
+        if not pbkdf2_sha256.verify(form.password.data, passwordHash[0]):
             raise(ValidationError(message))
         
 
@@ -30,3 +30,6 @@ def validate_password(bannedLetter="a"):
 class LoginForm(FlaskForm):
     username = StringField("User Name", validators=[InputRequired()])
     password = PasswordField("Password", validators=[InputRequired(), Length(min=3), validate_password()])
+
+
+print(pbkdf2_sha256.hash("test"))

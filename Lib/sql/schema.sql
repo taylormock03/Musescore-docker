@@ -3,7 +3,9 @@ CREATE TABLE IF NOT EXISTS Users  (
             password TEXT NOT NULL, 
             userName TEXT UNIQUE NOT NULL, 
             oauth TEXT, 
-            playlistID TEXT);
+            playlistID TEXT,
+            isAdmin TEXT not NULL
+            );
         
         CREATE TABLE IF NOT EXISTS Songs (
             SongID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL, 
