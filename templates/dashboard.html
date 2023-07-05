@@ -1,5 +1,7 @@
-<h1> Super Secret</h1>
-{% if current_user.is_authenticated %}
-  Hi {{ current_user.username }}!
-{% endif %}
-<a href="{{ url_for('logout') }}">logout</a>
+{% extends 'base.html' %}
+
+{%block content%}
+    <h1>Dashboard</h1>
+    Hi {{ current_user.username }}!
+
+{% endblock %}

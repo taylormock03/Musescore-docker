@@ -3,12 +3,12 @@ import os
 import secrets
 import sqlite3
 
-from flask import Flask, request, render_template, redirect, url_for 
+from flask import Flask, request, render_template, redirect, url_for, flash 
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_wtf import CSRFProtect
 
-from Lib.Python.Forms import LoginForm
-from Lib.Python.Users import User, verifyUser
+from Lib.Python.Forms import LoginForm, ModifyUser
+from Lib.Python.Users import User, updateUserInfo, verifyUser
 
 app= Flask(__name__)
 csrf = CSRFProtect()
@@ -36,12 +36,17 @@ def load_user(user_id):
     # test = User(user_id)
     return User(user_id)
 
+# This removes the session from memory and logs out the user
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(app.url_for('login'))
 
+# If a user attemps to access a page but isn't logged in, 
+# this redirects them to the login page
+# NOTE: this will eventually have to be changed to allow 
+# for the case where non-admin users try to access admin pages
 @login_manager.unauthorized_handler
 def unauthorised():
     return redirect(app.url_for('login'))
@@ -66,13 +71,33 @@ def login():
     return render_template("login.html", form=form)
 
 
-
+# LOGGED IN PAGES
 
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    print(current_user)
     return render_template('dashboard.html')
+
+@app.route("/settings", methods=['GET', 'POST'])
+@login_required
+def userSettings():
+    form = ModifyUser(obj=current_user)
+    if form.validate_on_submit():
+        updateUserInfo(current_user.get_id(), form)
+        flash("Successfully updated")
+
+    return render_template("userSettings.html", form=form)
+
+@app.route("/scanLibrary")
+@login_required
+def scanLibrary():
+    return
+
+
+
+
+
+
 
 if __name__ == '__main__':
     

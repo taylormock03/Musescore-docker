@@ -24,7 +24,7 @@ class User(UserMixin):
             self.password = data[1]
             self.username = data[2]
             self.oAuth = data[3]
-            self.playListId = data[4]
+            self.playListID = data[4]
             self.admin = data[5]=="TRUE"
         except: pass
         return        
@@ -48,3 +48,12 @@ def verifyUser(username, password):
         
     return _validatepassword(username, password)
     
+def updateUserInfo(currentUser, form):
+
+    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn.execute('UPDATE Users SET userName= ?, playListID = ? WHERE UserId = ?',
+                        (form.username.data, form.playListID.data, currentUser,))
+    conn.commit()
+    conn.close()
+                 
+                 

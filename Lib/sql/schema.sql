@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS Users  (
             password TEXT NOT NULL, 
             userName TEXT UNIQUE NOT NULL, 
             oauth TEXT, 
-            playlistID TEXT,
+            playListID TEXT,
             isAdmin TEXT not NULL
             );
         

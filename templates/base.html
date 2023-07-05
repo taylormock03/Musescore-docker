@@ -14,8 +14,17 @@
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('login') }}">FlaskApp</a>
-        <a href="#">About</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('userSettings') }}">Settings</a>
+
+        {%else%}
+        <a href="{{ url_for('login') }}">Login</a>
+        
+        {% endif %}
+
+        
+
     </nav>
     <hr>
     <div class="content">

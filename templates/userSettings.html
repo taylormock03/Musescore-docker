@@ -1,12 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Login {% endblock %}</h1>
+    <h1>{% block title %} User Settings {% endblock %}</h1>
 
-    <form method="POST" action="/">
+    <form method="POST" action="/settings">
         {{ form.csrf_token }}
-        
-        
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    {{ message }}<br>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
         <p>
             {{ form.username.label }}
             {{ form.username(size=20) }}
@@ -21,13 +29,13 @@
         {% endif %}
 
         <p>
-            {{ form.password.label }}
-            {{ form.password(size=20) }}
+            {{ form.playListID.label }}
+            {{ form.playListID(size=20) }}
         </p>
 
-        {% if form.password.errors %}
+        {% if form.playListID.errors %}
         <ul class="errors">
-            {% for error in form.password.errors %}
+            {% for error in form.playListID.errors %}
                 <li>{{ error }}</li>
             {% endfor %}
         </ul>
