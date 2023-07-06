@@ -1,50 +1,50 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} User Settings {% endblock %}</h1>
+<h1>{% block title %} User Settings {% endblock %}</h1>
 
-    <form method="POST" action="/settings">
-        {{ form.csrf_token }}
+<form method="POST" action="/settings">
+    {{ form.csrf_token }}
 
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    {{ message }}<br>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    {{ message }}<br>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
 
 
-        <p>
-            {{ form.username.label }}
-            {{ form.username(size=20) }}
-        </p>
+    <p>
+        {{ form.username.label }}
+        {{ form.username(size=20) }}
+    </p>
 
-        {% if form.username.errors %}
-        <ul class="errors">
-            {% for error in form.username.errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+    {% if form.username.errors %}
+    <ul class="errors">
+        {% for error in form.username.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 
-        <p>
-            {{ form.playListID.label }}
-            {{ form.playListID(size=20) }}
-        </p>
+    <p>
+        {{ form.playListID.label }}
+        {{ form.playListID(size=20) }}
+    </p>
 
-        {% if form.playListID.errors %}
-        <ul class="errors">
-            {% for error in form.playListID.errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-    
+    {% if form.playListID.errors %}
+    <ul class="errors">
+        {% for error in form.playListID.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 
-        <p>
-            <input type="submit" value="Add">
-        </p>
-    </form>
+
+    <p>
+        <input type="submit" value="Add">
+    </p>
+</form>
 
 {% endblock %}

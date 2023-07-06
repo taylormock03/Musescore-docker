@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{% block title %} {% endblock %} - FlaskApp</title>
@@ -12,18 +13,20 @@
         }
     </style>
 </head>
+
 <body>
     <nav>
         {% if current_user.is_authenticated %}
         <a href="{{ url_for('logout') }}">Logout</a>
         <a href="{{ url_for('userSettings') }}">Settings</a>
+        <a href="{{ url_for ('scanLibrary') }}"> Scan Library</a>
 
         {%else%}
         <a href="{{ url_for('login') }}">Login</a>
-        
+
         {% endif %}
 
-        
+
 
     </nav>
     <hr>
@@ -31,4 +34,5 @@
         {% block content %} {% endblock %}
     </div>
 </body>
+
 </html>

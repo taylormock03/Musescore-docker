@@ -3,14 +3,15 @@ import os
 import secrets
 import sqlite3
 
-from flask import Flask, request, render_template, redirect, url_for, flash 
+from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_wtf import CSRFProtect
 
-from Lib.Python.Forms import LoginForm, ModifyUser
+from Lib.Python.Forms import AdminSettings, LoginForm, ModifyUser
 from Lib.Python.Users import User, updateUserInfo, verifyUser
+from Lib.Python.YtHandler import searchLibrary
 
-app= Flask(__name__)
+app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
 
@@ -29,28 +30,33 @@ else:
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# This is used to reload the user object from 
+# This is used to reload the user object from
 # the user ID stored in the session
+
+
 @login_manager.user_loader
 def load_user(user_id):
     # test = User(user_id)
     return User(user_id)
 
 # This removes the session from memory and logs out the user
+
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(app.url_for('login'))
 
-# If a user attemps to access a page but isn't logged in, 
+# If a user attemps to access a page but isn't logged in,
 # this redirects them to the login page
-# NOTE: this will eventually have to be changed to allow 
+# NOTE: this will eventually have to be changed to allow
 # for the case where non-admin users try to access admin pages
+
+
 @login_manager.unauthorized_handler
 def unauthorised():
     return redirect(app.url_for('login'))
-
 
 
 # This is the function for the login page
@@ -78,6 +84,7 @@ def login():
 def dashboard():
     return render_template('dashboard.html')
 
+
 @app.route("/settings", methods=['GET', 'POST'])
 @login_required
 def userSettings():
@@ -88,19 +95,16 @@ def userSettings():
 
     return render_template("userSettings.html", form=form)
 
+
 @app.route("/scanLibrary")
 @login_required
 def scanLibrary():
-    return
-
-
-
-
-
+    searchLibrary(current_user.id, current_user.playListID)
+    return render_template('dashboard.html')
 
 
 if __name__ == '__main__':
-    
+
     # Create the database if it doesn't exist
     if not os.path.exists('Lib\sql\musicSQL.db'):
         conn = sqlite3.connect('Lib\sql\musicSQL.db')
@@ -108,7 +112,4 @@ if __name__ == '__main__':
             conn.executescript(f.read())
         conn.close()
 
-
     app.run(debug=True)
-
-    
