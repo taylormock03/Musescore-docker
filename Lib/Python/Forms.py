@@ -32,7 +32,7 @@ def validate_password():
 def validate_username():
     def _sqlGetUsername(username):
         conn = sqlite3.connect('Lib\sql\musicSQL.db')
-        return conn.execute('SELECT UserName FROM Users where UserName = ?',
+        return conn.execute('SELECT UserId FROM Users where UserName = ?',
                             (username,)).fetchone()
 
     def _sqlGetID(id):
@@ -41,11 +41,15 @@ def validate_username():
                             (id,)).fetchone()
 
     def _checkExists(form, field):
+        # Checks if the username exists
         x = _sqlGetUsername(field.data)
         if x == None:
             return
 
-        elif x[0] == _sqlGetID(form.id.data):
+        # we know the username is being used
+        # here we check if it is being used by the user requesting a change
+        # This is the case when updating the playlist ID but not the username
+        elif x[0] == form.id.data:
             return
 
         else:
