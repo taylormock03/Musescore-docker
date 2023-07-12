@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} User Settings {% endblock %}</h1>
+
+<form method="POST" action="{{url_for ('editSong', songID=songID)}}">
+    {{ form.csrf_token }}
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    {{ message }}<br>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+
+    <p>
+        {{ form.name.label }}
+        {{ form.name(size=20) }}
+    </p>
+
+    {% if form.name.errors %}
+    <ul class="errors">
+        {% for error in form.name.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p>
+        {{ form.artist.label }}
+        {{ form.artist(size=20) }}
+    </p>
+
+    {% if form.artist.errors %}
+    <ul class="errors">
+        {% for error in form.artist.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p>
+        {{ form.msLink.label }}
+        {{ form.msLink(size=20) }}
+    </p>
+
+    {% if form.msLink.errors %}
+    <ul class="errors">
+        {% for error in form.msLink.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p>
+        {{ form.ytLink.label }}
+        {{ form.ytLink(size=20) }}
+    </p>
+
+    {% if form.ytLink.errors %}
+    <ul class="errors">
+        {% for error in form.ytLink.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    
+
+
+    <p>
+        <input type="submit" value="Save">
+    </p>
+</form>
+
+{% endblock %}

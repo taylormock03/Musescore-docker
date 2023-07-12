@@ -3,13 +3,23 @@
 {%block content%}
 
 {% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
-{{ message }}<br>
-{% endfor %}
-{% endif %}
+    {% if messages %}
+        {% for message in messages %}
+            {{ message }}<br>
+        {% endfor %}
+    {% endif %}
 {% endwith %}
 <h1>Dashboard</h1>
-Hi {{ current_user.username }}!
+
+
+    {% for song in songs | sort(attribute="0") %}
+        <a href='{{url_for ("viewSong", songID = song[1])}}' class="SongIcon">
+        <div>
+            <img src={{song[-1]}}> </img>
+            <p> {{song[0]}} - {{song[2]}}</p>
+        </div>
+        </a>
+
+    {% endfor %}
 
 {% endblock %}

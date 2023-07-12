@@ -76,4 +76,13 @@ class AdminSettings(ModifyUser):
     newPassword = StringField("New Password", validators=[Length(min=3)])
 
 
-print(pbkdf2_sha256.hash("test"))
+class songForm(FlaskForm):
+    name = StringField("Song Name", validators=[
+                           InputRequired()])
+    artist = StringField("Artist Name", validators=[
+                           InputRequired()])
+    
+    msLink = StringField("Musescore Link")
+    ytLink = StringField("Youtube Link")
+    id= StringField()
+

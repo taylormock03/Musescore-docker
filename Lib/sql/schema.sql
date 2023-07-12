@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS Songs (
 CREATE TABLE IF NOT EXISTS Catalog (
     UserID TEXT NOT NULL,
     SongID TEXT NOT NULL,
+    Tag TEXT,
     FOREIGN KEY (UserID) References Users (UserID),
     FOREIGN KEY (SongID) References Songs (SongID) PRIMARY KEY (UserID, SongID)
 );

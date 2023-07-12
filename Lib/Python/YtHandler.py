@@ -2,6 +2,8 @@ import sqlite3
 from flask import flash
 from ytmusicapi import YTMusic
 
+from Lib.Python.MuseScoreHandler import DownloadMissing
+
 
 def searchLibrary(userId, playlistId):
     Yt = YTMusic()
@@ -18,6 +20,9 @@ def searchLibrary(userId, playlistId):
         updateLibrary(userId, song, conn)
     conn.commit()
     conn.close()
+
+    # Attemps to download all missing songs 
+    DownloadMissing()
 
 
 def updateLibrary(userId, song, conn):

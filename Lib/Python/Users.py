@@ -57,3 +57,18 @@ def updateUserInfo(currentUser, form):
     conn.close()
                  
                  
+def getUserSongs(userID):
+
+    query = """
+        SELECT  Name, SongID, Artist, Thumbnail from Songs
+        where SongID IN 
+            (Select SongID from Catalog
+            where UserID = ?
+            
+            )
+    """
+    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    songs = conn.execute(query, (userID,)).fetchall()
+
+    return songs
+

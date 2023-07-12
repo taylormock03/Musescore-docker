@@ -18,6 +18,7 @@
     <nav>
         {% if current_user.is_authenticated %}
         <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('dashboard')}}">Home</a>
         <a href="{{ url_for('userSettings') }}">Settings</a>
         <a href="{{ url_for ('scanLibrary') }}"> Scan Library</a>
 

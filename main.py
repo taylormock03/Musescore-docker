@@ -3,12 +3,14 @@ import os
 import secrets
 import sqlite3
 
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash, send_file
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_wtf import CSRFProtect
+from markupsafe import escape
 
-from Lib.Python.Forms import AdminSettings, LoginForm, ModifyUser
-from Lib.Python.Users import User, updateUserInfo, verifyUser
+from Lib.Python.Forms import AdminSettings, LoginForm, ModifyUser, songForm
+from Lib.Python.SongHandler import getSong, updateSong
+from Lib.Python.Users import User, getUserSongs, updateUserInfo, verifyUser
 from Lib.Python.YtHandler import searchLibrary
 
 app = Flask(__name__)
@@ -82,7 +84,8 @@ def login():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    songs = getUserSongs(current_user.get_id())
+    return render_template('dashboard.html', songs = songs)
 
 
 @app.route("/settings", methods=['GET', 'POST'])
@@ -101,6 +104,42 @@ def userSettings():
 def scanLibrary():
     searchLibrary(current_user.id, current_user.playListID)
     return render_template('dashboard.html')
+
+
+
+@app.route("/songs/<songID>")
+@login_required
+def viewSong(songID):
+    songID = escape(songID)
+    song = getSong(songID)
+    return render_template('songView.html', song=song)
+
+
+@app.route("/download/<filepath>")
+@login_required
+def downloadSong(filepath):
+    filename = escape(filepath)
+    filepath = "./Songs/" + escape(filepath)
+    return send_file(
+        filepath,
+        download_name=filename,
+        as_attachment=True
+    )
+
+@app.route("/edit/<songID>", methods=['GET', 'POST'])
+@login_required
+def editSong(songID):
+    songID = escape(songID)
+    song = getSong(songID)
+    form = songForm(obj = song)
+    if form.validate_on_submit():
+        updateSong(form)
+        return app.redirect(url_for('viewSong', songID=songID))
+    return render_template('songEdit.html', form = form, songID = songID)
+
+
+
+
 
 
 if __name__ == '__main__':
