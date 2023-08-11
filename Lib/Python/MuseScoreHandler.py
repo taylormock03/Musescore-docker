@@ -104,7 +104,7 @@ def DownloadMissing():
     # This is where we get the url of the song
     # It is an asyncrhronous function that looks for the 
     # song on musescore and passes back the url
-    for x in songs[:15]:
+    for x in songs:
         i+=1
         x = x[0]
 
@@ -140,9 +140,6 @@ def DownloadMissing():
             except:
                 pass
         i+=max_processes
-
-    for index, thread in enumerate(URLthreads):
-        thread.join()
     
 
     # Grab all of the urls and turn them into a list that can be read

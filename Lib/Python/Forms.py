@@ -8,6 +8,10 @@ from wtforms.validators import InputRequired, Length, ValidationError
 
 from passlib.hash import pbkdf2_sha256
 
+from os import path
+from Lib.Python.SongHandler import getAllSongs
+
+from Lib.Python.environmentHandler import getImportSongs
 
 def validate_password():
     message = 'Username or password is incorrect'
@@ -58,6 +62,23 @@ def validate_username():
     return _checkExists
 
 
+def verifyFilePath():
+
+    def _checkExists(form, field):
+        if not path.exists(field.data):
+            raise (ValidationError("This path does not exist"))
+        
+        if not path.isdir(field.data):
+            raise(ValidationError("This is not a folder (most likely a file)"))
+        
+        if field.data == "Songs":
+            raise(ValidationError("This is a forbidden folder"))
+        
+        return
+
+    return _checkExists
+
+
 class LoginForm(FlaskForm):
     username = StringField("User Name", validators=[InputRequired()])
     password = PasswordField("Password", validators=[
@@ -71,9 +92,12 @@ class ModifyUser(FlaskForm):
     id = StringField()
 
 
-class AdminSettings(ModifyUser):
+class AdminModifyUser(ModifyUser):
     isAdmin = BooleanField("isAdmin")
     newPassword = StringField("New Password", validators=[Length(min=3)])
+
+class AdminGlobalRules(FlaskForm):
+    importDirectory = StringField("Import Folder Path", validators=[Length(min=2), verifyFilePath()])
 
 
 class songForm(FlaskForm):
@@ -86,3 +110,11 @@ class songForm(FlaskForm):
     ytLink = StringField("Youtube Link")
     id= StringField()
 
+class importForm(FlaskForm):
+    importFile = SelectField("File to be Imported")
+    song = SelectField("Song")
+
+    def __init__(self, *args, **kwargs):
+        super(importForm, self).__init__(*args, **kwargs)
+        self.song.choices= getAllSongs()
+        self.importFile.choices = getImportSongs()

@@ -30,3 +30,14 @@ def updateSong(form):
     conn.commit()
     conn.close()
 
+# Returns all songs names in the database. Primarily used for manual imports
+def getAllSongs():
+
+    query = """
+        SELECT SongID, Name from Songs
+
+    """
+    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    songs = conn.execute(query).fetchall()
+
+    return songs

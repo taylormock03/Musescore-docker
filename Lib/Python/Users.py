@@ -72,3 +72,6 @@ def getUserSongs(userID):
 
     return songs
 
+
+
+print(pbkdf2_sha256.hash("test"))

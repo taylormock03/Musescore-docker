@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Import songs {% endblock %}</h1>
+
+{% from "_formhelpers.html" import render_field,show_errors %}
+<form method="POST" action="/import">
+    {{ form.csrf_token }}
+
+    {{show_errors()}}
+
+    {{ render_field(form.importFile) }}
+    {{ render_field(form.song) }}
+
+    
+    <p>
+        <input type="submit" value="Import">
+    </p>
+</form>
+    
+{% endblock %}

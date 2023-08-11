@@ -21,7 +21,14 @@
         <a href="{{ url_for('dashboard')}}">Home</a>
         <a href="{{ url_for('userSettings') }}">Settings</a>
         <a href="{{ url_for ('scanLibrary') }}"> Scan Library</a>
+        
 
+            {% if current_user.admin %}
+
+            <a href="{{ url_for('adminSettings') }}">Admin</a>
+            <a href="{{ url_for ('manualImport') }}"> Import Song</a>
+
+            {% endif %}
         {%else%}
         <a href="{{ url_for('login') }}">Login</a>
 
