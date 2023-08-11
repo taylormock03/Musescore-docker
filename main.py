@@ -62,7 +62,9 @@ def load_user(user_id):
 # END initialisation
 
 
-
+@app.route("/test")
+def test():
+    return render_template("test.html")
 
 
 @app.route('/logout')
