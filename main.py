@@ -9,9 +9,9 @@ from flask_login import LoginManager, login_required, login_user, logout_user, c
 from flask_wtf import CSRFProtect
 from markupsafe import escape
 
-from Lib.Python.Forms import AdminModifyUser, AdminGlobalRules, LoginForm, ModifyUser, importForm, songForm
+from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, LoginForm, ModifyUser, importForm, songForm
 from Lib.Python.SongHandler import getSong, updateSong
-from Lib.Python.Users import User, getUserSongs, updateUserInfo, verifyUser
+from Lib.Python.Users import User, getUserSongs, updateUserInfo, updateUserInfoAdmin, verifyUser
 from Lib.Python.YtHandler import searchLibrary
 from Lib.Python.environmentHandler import importSong, initialiseSettings, updateEnvironment
 
@@ -57,7 +57,6 @@ def unauthorised():
 # the user ID stored in the session
 @login_manager.user_loader
 def load_user(user_id):
-    # test = User(user_id)
     return User(user_id)
 
 # END initialisation
@@ -101,7 +100,7 @@ def dashboard():
     songs = getUserSongs(current_user.get_id())
     return render_template('dashboard.html', songs = songs)
 
-
+# This is where a user can modify their own settings
 @app.route("/settings", methods=['GET', 'POST'])
 @login_required
 def userSettings():
@@ -121,14 +120,38 @@ def adminSettings():
     
     return render_template('adminDash.html')
 
-@app.route("/adminUser", methods=['GET', 'POST'])
+
+# This allows the admin to select a specific user that will be modified in the following function
+@app.route("/adminUserSelect", methods=['GET', 'POST'])
 @login_required
-def adminUserSettings():
+def adminUserSelect():
     # If someone who is not an admin tries to access this, they will be rejected
     if not current_user.admin:
         abort(403)
+
+    form = AdminChooseUser()
+    if form.validate_on_submit():
+        return app.redirect(url_for('adminUserSettings', userID=form.userID.data))
+
     
-    return render_template('adminUsers.html')
+    return render_template('adminUserSelect.html', form=form)
+
+
+# This allows the administrator to modify the settings of a user
+@app.route("/adminUser/<userID>", methods=['GET', 'POST'])
+@login_required
+def adminUserSettings(userID):
+    # If someone who is not an admin tries to access this, they will be rejected
+    if not current_user.admin:
+        abort(403)
+
+    user = load_user(userID)
+    form = AdminModifyUser(obj=user)
+    if form.validate_on_submit():
+        updateUserInfoAdmin(form)
+        flash("Success")
+    
+    return render_template('adminUsers.html', form=form, userID=userID)
 
 @app.route("/adminGlobal", methods=['GET', 'POST'])
 @login_required

@@ -5,11 +5,13 @@ from flask_wtf.form import _Auto
 from wtforms import (StringField, TextAreaField, IntegerField,
                      BooleanField, RadioField, PasswordField, SelectField)
 from wtforms.validators import InputRequired, Length, ValidationError
+from wtforms.widgets import PasswordInput
 
 from passlib.hash import pbkdf2_sha256
 
 from os import path
 from Lib.Python.SongHandler import getAllSongs
+from Lib.Python.Users import getAllUsers
 
 from Lib.Python.environmentHandler import getImportSongs
 
@@ -93,12 +95,18 @@ class ModifyUser(FlaskForm):
 
 
 class AdminModifyUser(ModifyUser):
-    isAdmin = BooleanField("isAdmin")
-    newPassword = StringField("New Password", validators=[Length(min=3)])
+    admin = BooleanField("isAdmin")
+    password = StringField("Password", widget=PasswordInput(hide_value=False), validators=[InputRequired(), Length(min=3)])
 
 class AdminGlobalRules(FlaskForm):
     importDirectory = StringField("Import Folder Path", validators=[Length(min=2), verifyFilePath()])
 
+class AdminChooseUser(FlaskForm):
+    userID = SelectField("User to edit")
+    def __init__(self, *args, **kwargs):
+        super(AdminChooseUser, self).__init__(*args, **kwargs)
+
+        self.userID.choices = getAllUsers()
 
 class songForm(FlaskForm):
     name = StringField("Song Name", validators=[

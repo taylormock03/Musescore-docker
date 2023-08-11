@@ -5,15 +5,12 @@
 
 <h1>{% block title %} Admin Settings {% endblock %}</h1>
 
-<form method="POST" action="/adminUser/{{userID}}">
+<form method="POST" action="/adminUserSelect">
     {{ form.csrf_token }}
-    
+
     {{show_errors()}}
 
-    {{ render_field(form.username) }}
-    {{ render_field(form.admin) }}
-    {{ render_field(form.password) }}
-    {{ render_field(form.playListID) }}
+    {{ render_field(form.userID) }}
     
     <p>
         <input type="submit" value="update">

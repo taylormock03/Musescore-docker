@@ -48,6 +48,7 @@ def verifyUser(username, password):
         
     return _validatepassword(username, password)
     
+# This is for regular users who can modify their own data
 def updateUserInfo(currentUser, form):
 
     conn = sqlite3.connect('Lib\sql\musicSQL.db')
@@ -55,8 +56,26 @@ def updateUserInfo(currentUser, form):
                         (form.username.data, form.playListID.data, currentUser,))
     conn.commit()
     conn.close()
-                 
-                 
+
+# This is used by administrators who are modifying the accounts of other users  
+def updateUserInfoAdmin(form):
+    if "$pbkdf2-sha256" in form.password.data:
+        passwordHash= form.password.data
+    else:
+        passwordHash = pbkdf2_sha256.hash(form.password.data)
+
+    if form.admin.data:
+        isAdmin="TRUE"
+    else:
+        isAdmin="FALSE"
+
+    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn.execute('UPDATE Users SET userName= ?, playListID = ?, isAdmin=?, password=? WHERE UserId = ?',
+                        (form.username.data, form.playListID.data, isAdmin, passwordHash, form.id.data,))
+    conn.commit()
+    conn.close()
+
+
 def getUserSongs(userID):
 
     query = """
@@ -73,5 +92,10 @@ def getUserSongs(userID):
     return songs
 
 
+def getAllUsers():
+    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    users = conn.execute("SELECT UserId, userName from Users").fetchall()
+    conn.close()
+    return users
 
 print(pbkdf2_sha256.hash("test"))
