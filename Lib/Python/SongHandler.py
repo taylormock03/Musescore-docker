@@ -35,9 +35,16 @@ def getAllSongs():
 
     query = """
         SELECT SongID, Name from Songs
-
     """
     conn = sqlite3.connect('Lib\sql\musicSQL.db')
     songs = conn.execute(query).fetchall()
 
     return songs
+
+
+def getSongID(name):
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    info = conn.execute("select SongID from Songs where Name = ?",
+                        (name,)).fetchone()
+    
+    return info[0]

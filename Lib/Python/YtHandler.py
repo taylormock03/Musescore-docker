@@ -4,8 +4,8 @@ from ytmusicapi import YTMusic
 
 from Lib.Python.MuseScoreHandler import DownloadMissing
 
-
-def searchLibrary(userId, playlistId):
+# Syncs all the songs in the user's youtube playlist into database
+def searchUserLibrary(userId, playlistId):
     Yt = YTMusic()
     playlist = ""
     try:
@@ -21,10 +21,9 @@ def searchLibrary(userId, playlistId):
     conn.commit()
     conn.close()
 
-    # Attemps to download all missing songs 
-    DownloadMissing()
 
 
+# This adds each song found in the user's playlist to their account
 def updateLibrary(userId, song, conn):
 
     # If the video ID is blank, the video no longer exists on youtube
@@ -57,8 +56,9 @@ def updateLibrary(userId, song, conn):
                                  (song['videoId'], userId,)).fetchone()
 
     if songinCatalog == None:
-        conn.execute("INSERT INTO Catalog VALUES (?, ?)",
+        conn.execute("INSERT INTO Catalog VALUES (?, ?, ?)",
                      (userId,
                       song['videoId'],
+                      None,
                       ))
     return

@@ -1,18 +1,20 @@
 from functools import wraps
+import json
 from os import path
 
 import secrets
 import sqlite3
 
-from flask import Flask, request, render_template, redirect, url_for, flash, send_file,abort
+from flask import Flask, Response, request, render_template, redirect, url_for, flash, send_file,abort
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_wtf import CSRFProtect
 from markupsafe import escape
 
-from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, LoginForm, ModifyUser, importForm, songForm
-from Lib.Python.SongHandler import getSong, updateSong
+from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, LoginForm, ModifyUser, SearchForm, importForm, songForm
+from Lib.Python.MuseScoreHandler import DownloadMissing
+from Lib.Python.SongHandler import getSong, getSongID, updateSong
 from Lib.Python.Users import User, getUserSongs, updateUserInfo, updateUserInfoAdmin, verifyUser
-from Lib.Python.YtHandler import searchLibrary
+from Lib.Python.YtHandler import searchUserLibrary
 from Lib.Python.environmentHandler import importSong, initialiseSettings, updateEnvironment
 
 # Environment Initialisation
@@ -59,12 +61,17 @@ def unauthorised():
 def load_user(user_id):
     return User(user_id)
 
+# This provides functions that need to be accessible in every page
+@app.context_processor
+def utility_processor():
+    # This is used for the search function and passes a list 
+    # of all the names of the user's songs
+    # This allows for autocomplete to work
+    
+    def searchForm():
+        return SearchForm(request.form)
+    return dict(searchForm=searchForm)
 # END initialisation
-
-
-@app.route("/test")
-def test():
-    return render_template("test.html")
 
 
 @app.route('/logout')
@@ -74,6 +81,14 @@ def logout():
     return redirect(app.url_for('login'))
 
 
+@app.route("/_autocomplete", methods=['GET'])
+@login_required
+def autocomplete():
+    songsRaw = getUserSongs(current_user.get_id())
+    songTitles=[]
+    for x in songsRaw:
+        songTitles.append(x[0])
+    return Response(json.dumps(songTitles), mimetype='application/json')
 
 
 # This is the function for the login page
@@ -96,7 +111,7 @@ def login():
 
 # LOGGED IN PAGES
 
-@app.route("/dashboard")
+@app.route("/dashboard", methods=['GET', 'POST'])
 @login_required
 def dashboard():
     songs = getUserSongs(current_user.get_id())
@@ -172,8 +187,19 @@ def adminGlobalSettings():
 @app.route("/scanLibrary")
 @login_required
 def scanLibrary():
-    searchLibrary(current_user.id, current_user.playListID)
-    return render_template('dashboard.html')
+    searchUserLibrary(current_user.id, current_user.playListID)
+    return redirect(url_for('dashboard'))
+
+# This will search musescore for all songs that are currently missing
+@app.route('/searchLibrary')
+@login_required
+def searchLibrary():
+    # If someone who is not an admin tries to access this, they will be rejected
+    if not current_user.admin:
+        abort(403)
+    # Attemps to download all missing songs 
+    DownloadMissing()
+    return redirect(url_for('dashboard'))
 
 @app.route("/import", methods=['GET', 'POST'])
 @login_required
@@ -217,8 +243,15 @@ def editSong(songID):
         return app.redirect(url_for('viewSong', songID=songID))
     return render_template('songEdit.html', form = form, songID = songID)
 
+# This is used when searching for songs to redirect the user to the song page
+@app.route("/findSong", methods=['GET','POST'])
+@login_required
+def findSong():
+    songName = request.form.get("autocomp")
+    
+    songID = getSongID(songName) 
 
-
+    return redirect(url_for("viewSong", songID=songID))
 
 
 

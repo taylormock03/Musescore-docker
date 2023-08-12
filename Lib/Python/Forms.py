@@ -126,3 +126,7 @@ class importForm(FlaskForm):
         super(importForm, self).__init__(*args, **kwargs)
         self.song.choices= getAllSongs()
         self.importFile.choices = getImportSongs()
+
+class SearchForm(FlaskForm):
+    autocomp = StringField('Search Song', id='search_autocomplete')
+
