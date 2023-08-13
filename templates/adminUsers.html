@@ -15,9 +15,8 @@
     {{ render_field(form.password) }}
     {{ render_field(form.playListID) }}
     
-    <p>
-        <input type="submit" value="update">
-    </p>
+    {{render_field(form.update)}}
+    {{render_field(form.delete)}}
 </form>
 
 {% endblock %}

@@ -1,6 +1,9 @@
 import os
 import shutil
 import sqlite3
+from passlib.hash import pbkdf2_sha256
+
+from Lib.Python.Users import addUser
 
 def getImportDirectory():
     with open("globalSettings",'r') as file:
@@ -9,6 +12,16 @@ def getImportDirectory():
                 importDirectory= x.split("=")[1]
                 importDirectory = importDirectory.strip()
     return importDirectory
+
+# Creates an empty data base with a default 'admin' user
+def createDB():
+    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    with open('Lib\sql\schema.sql') as f:
+        conn.executescript(f.read())
+    
+    conn.commit()
+    conn.close()
+    addUser("admin", pbkdf2_sha256.hash("admin"), isAdmin=True)
 
 
 def initialiseSettings():
@@ -32,8 +45,7 @@ def updateEnvironment(form):
 def getImportSongs():
     importDirectory = getImportDirectory()
     return os.listdir(importDirectory)
-            
-
+        
 
 def importSong(form):
     fileName= form.importFile.data

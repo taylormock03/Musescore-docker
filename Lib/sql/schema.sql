@@ -22,3 +22,9 @@ CREATE TABLE IF NOT EXISTS Catalog (
     FOREIGN KEY (UserID) References Users (UserID),
     FOREIGN KEY (SongID) References Songs (SongID) PRIMARY KEY (UserID, SongID)
 );
+
+CREATE TABLE IF NOT EXISTS UserSignup (
+    UserId INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    userName TEXT UNIQUE NOT NULL
+);

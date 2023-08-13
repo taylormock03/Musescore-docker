@@ -4,18 +4,20 @@ from os import path
 
 import secrets
 import sqlite3
+from passlib.hash import pbkdf2_sha256
+
 
 from flask import Flask, Response, request, render_template, redirect, url_for, flash, send_file,abort
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_wtf import CSRFProtect
 from markupsafe import escape
 
-from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, LoginForm, ModifyUser, SearchForm, importForm, songForm
+from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, AdminSignup, LoginForm, ModifyUser, SearchForm, SignupApprove, UserSignup, importForm, songForm
 from Lib.Python.MuseScoreHandler import DownloadMissing
 from Lib.Python.SongHandler import getSong, getSongID, updateSong
-from Lib.Python.Users import User, getUserSongs, updateUserInfo, updateUserInfoAdmin, verifyUser
+from Lib.Python.Users import User, acceptSignups, addSignup, addUser, declineSignups, getUserSongs, removeUser, updateUserInfo, updateUserInfoAdmin, verifyUser
 from Lib.Python.YtHandler import searchUserLibrary
-from Lib.Python.environmentHandler import importSong, initialiseSettings, updateEnvironment
+from Lib.Python.environmentHandler import createDB, importSong, initialiseSettings, updateEnvironment
 
 # Environment Initialisation
 app = Flask(__name__)
@@ -39,10 +41,8 @@ login_manager.init_app(app)
 
 # Create the database if it doesn't exist
 if not path.exists('Lib\sql\musicSQL.db'):
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
-    with open('Lib\sql\schema.sql') as f:
-        conn.executescript(f.read())
-    conn.close()
+    createDB()
+    
 
 if not path.exists("globalSettings"):
     initialiseSettings()
@@ -108,6 +108,17 @@ def login():
 
     return render_template("login.html", form=form)
 
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = UserSignup()
+
+    if form.validate_on_submit():
+        flash('Signed Up - Please wait for an Admin to approve your request')
+
+        addSignup(form)
+
+
+    return render_template('UserSignup.html', form=form)
 
 # LOGGED IN PAGES
 
@@ -128,89 +139,12 @@ def userSettings():
 
     return render_template("userSettings.html", form=form)
 
-@app.route("/adminSettings")
-@login_required
-def adminSettings():
-    # If someone who is not an admin tries to access this, they will be rejected
-    if not current_user.admin:
-        abort(403)
-    
-    return render_template('adminDash.html')
-
-
-# This allows the admin to select a specific user that will be modified in the following function
-@app.route("/adminUserSelect", methods=['GET', 'POST'])
-@login_required
-def adminUserSelect():
-    # If someone who is not an admin tries to access this, they will be rejected
-    if not current_user.admin:
-        abort(403)
-
-    form = AdminChooseUser()
-    if form.validate_on_submit():
-        return app.redirect(url_for('adminUserSettings', userID=form.userID.data))
-
-    
-    return render_template('adminUserSelect.html', form=form)
-
-
-# This allows the administrator to modify the settings of a user
-@app.route("/adminUser/<userID>", methods=['GET', 'POST'])
-@login_required
-def adminUserSettings(userID):
-    # If someone who is not an admin tries to access this, they will be rejected
-    if not current_user.admin:
-        abort(403)
-
-    user = load_user(userID)
-    form = AdminModifyUser(obj=user)
-    if form.validate_on_submit():
-        updateUserInfoAdmin(form)
-        flash("Success")
-    
-    return render_template('adminUsers.html', form=form, userID=userID)
-
-@app.route("/adminGlobal", methods=['GET', 'POST'])
-@login_required
-def adminGlobalSettings():
-    # If someone who is not an admin tries to access this, they will be rejected
-    if not current_user.admin:
-        abort(403)
-    
-    form = AdminGlobalRules()
-    if form.validate_on_submit():
-        updateEnvironment(form)
-        flash("Success")
-
-    return render_template("adminGlobal.html", form=form)
-
+# This looks for songs in a playlist that are currently missing
 @app.route("/scanLibrary")
 @login_required
 def scanLibrary():
     searchUserLibrary(current_user.id, current_user.playListID)
     return redirect(url_for('dashboard'))
-
-# This will search musescore for all songs that are currently missing
-@app.route('/searchLibrary')
-@login_required
-def searchLibrary():
-    # If someone who is not an admin tries to access this, they will be rejected
-    if not current_user.admin:
-        abort(403)
-    # Attemps to download all missing songs 
-    DownloadMissing()
-    return redirect(url_for('dashboard'))
-
-@app.route("/import", methods=['GET', 'POST'])
-@login_required
-def manualImport():
-    form = importForm()
-    if form.validate_on_submit():
-        flash("Importing...")
-        importSong(form)
-        flash("Success")
-
-    return render_template('importSongs.html', form = form)
 
 
 @app.route("/songs/<songID>")
@@ -254,6 +188,134 @@ def findSong():
     return redirect(url_for("viewSong", songID=songID))
 
 
+# ADMIN Pages
+
+@app.route("/adminSettings")
+@login_required
+def adminSettings():
+    # If someone who is not an admin tries to access this, they will be rejected
+    if not current_user.admin:
+        abort(403)
+    
+    return render_template('adminDash.html')
+
+
+# This allows the admin to select a specific user that will be modified in the following function
+@app.route("/adminUserSelect", methods=['GET', 'POST'])
+@login_required
+def adminUserSelect():
+    # If someone who is not an admin tries to access this, they will be rejected
+    if not current_user.admin:
+        abort(403)
+
+    form = AdminChooseUser()
+    if form.validate_on_submit():
+        return app.redirect(url_for('adminUserSettings', userID=form.userID.data))
+
+    
+    return render_template('adminUserSelect.html', form=form)
+
+
+# This allows the administrator to modify the settings of a user
+@app.route("/adminUser/<userID>", methods=['GET', 'POST'])
+@login_required
+def adminUserSettings(userID):
+    userID = escape(userID)
+    # If someone who is not an admin tries to access this, they will be rejected
+    if not current_user.admin:
+        abort(403)
+
+    user = load_user(userID)
+    form = AdminModifyUser(obj=user)
+    if form.validate_on_submit():
+        if form.update.data:
+            updateUserInfoAdmin(form)
+            flash("Success")
+
+        elif form.delete.data:
+            removeUser(userID)
+            flash("User Successfully deleted")
+
+    return render_template('adminUsers.html', form=form, userID=userID)
+
+@app.route("/adminGlobal", methods=['GET', 'POST'])
+@login_required
+def adminGlobalSettings():
+    # If someone who is not an admin tries to access this, they will be rejected
+    if not current_user.admin:
+        abort(403)
+    
+    form = AdminGlobalRules()
+    if form.validate_on_submit():
+        updateEnvironment(form)
+        flash("Success")
+
+    return render_template("adminGlobal.html", form=form)
+
+
+# This will search musescore for all songs that are currently missing
+@app.route('/searchLibrary')
+@login_required
+def searchLibrary():
+    # If someone who is not an admin tries to access this, they will be rejected
+    if not current_user.admin:
+        abort(403)
+    # Attemps to download all missing songs 
+    DownloadMissing()
+    return redirect(url_for('dashboard'))
+
+@app.route("/import", methods=['GET', 'POST'])
+@login_required
+def manualImport():
+    if not current_user.admin:
+        abort(403)
+    form = importForm()
+    if form.validate_on_submit():
+        flash("Importing...")
+        importSong(form)
+        flash("Success")
+
+    return render_template('importSongs.html', form = form)
+
+# This is where an admin can create a new user
+# This is distinct from the user accessible signup page as it doesn't 
+# require an admin to approve the signup i.e the account is immediately created
+@app.route("/newUser", methods=['GET', 'POST'])
+@login_required
+def adminNewUser():
+    if not current_user.admin:
+        abort(403)
+
+    form = AdminSignup()
+    if form.validate_on_submit():
+        name = form.username.data
+        password = pbkdf2_sha256.hash(form.password.data)
+        isAdmin = form.isAdmin.data
+        addUser(name, password, isAdmin=isAdmin)
+        flash("User added")
+
+    return render_template('adminNewUser.html', form = form)
+
+# This is where an admin can approve a new user
+@app.route("/approveUser", methods=['GET', 'POST'])
+@login_required
+def adminApproveUser():
+    if not current_user.admin:
+        abort(403)
+
+    form = SignupApprove()
+    if form.validate_on_submit():
+        if form.approve.data:
+            flash ("Users approved")
+            acceptSignups(form.signups.data)
+
+        elif form.reject.data:
+            flash("Users rejected")
+            declineSignups(form.signups.data)
+
+        return redirect(url_for("adminApproveUser"))
+
+    return render_template('adminApprove.html', form = form)
 
 if __name__ == '__main__':
 

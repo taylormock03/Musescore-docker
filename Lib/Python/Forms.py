@@ -3,15 +3,16 @@ from wsgiref.validate import validator
 from flask_wtf import FlaskForm
 from flask_wtf.form import _Auto
 from wtforms import (StringField, TextAreaField, IntegerField,
-                     BooleanField, RadioField, PasswordField, SelectField)
+                     BooleanField, RadioField, PasswordField, SelectField, 
+                     SelectMultipleField, SubmitField)
 from wtforms.validators import InputRequired, Length, ValidationError
-from wtforms.widgets import PasswordInput
+from wtforms.widgets import PasswordInput, CheckboxInput, ListWidget
 
 from passlib.hash import pbkdf2_sha256
 
 from os import path
 from Lib.Python.SongHandler import getAllSongs
-from Lib.Python.Users import getAllUsers
+from Lib.Python.Users import getAllUsers, getSignups
 
 from Lib.Python.environmentHandler import getImportSongs
 
@@ -87,6 +88,30 @@ class LoginForm(FlaskForm):
                              InputRequired(), Length(min=3), validate_password()])
 
 
+class UserSignup(FlaskForm):
+    username = StringField("User Name", validators=[
+                           InputRequired(), validate_username()])
+    
+    password = PasswordField("Password", validators=[
+                             InputRequired(), Length(min=3)])
+    
+
+class AdminSignup(UserSignup):
+    isAdmin = BooleanField("isAdmin")
+
+class SignupApprove(FlaskForm):
+    signups = SelectMultipleField("Users", 
+                                widget=ListWidget(prefix_label=False),
+                                option_widget=CheckboxInput())
+    
+    approve = SubmitField()
+    reject = SubmitField()
+
+    def __init__(self, *args, **kwargs):
+        super(SignupApprove, self).__init__(*args, **kwargs)
+        self.signups.choices= getSignups()
+
+
 class ModifyUser(FlaskForm):
     username = StringField("User Name", validators=[
                            InputRequired(), validate_username()])
@@ -97,6 +122,9 @@ class ModifyUser(FlaskForm):
 class AdminModifyUser(ModifyUser):
     admin = BooleanField("isAdmin")
     password = StringField("Password", widget=PasswordInput(hide_value=False), validators=[InputRequired(), Length(min=3)])
+
+    update = SubmitField()
+    delete = SubmitField()
 
 class AdminGlobalRules(FlaskForm):
     importDirectory = StringField("Import Folder Path", validators=[Length(min=2), verifyFilePath()])

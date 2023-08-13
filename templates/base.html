@@ -21,12 +21,12 @@
 <body>
 
 <div class="d-flex" id="wrapper">
-
+    {% if current_user.is_authenticated %}
     <!-- Sidebar -->
     <div class="bg-light border-right" id="sidebar-wrapper">
         <div class="sidebar-heading">Musescore</div>
         <div class="list-group list-group-flush">
-            {% if current_user.is_authenticated %}
+            
                 <a href="{{ url_for('dashboard')}}" class="list-group-item list-group-item-action bg-light">Dashboard</a>
                 <a href="{{ url_for('userSettings') }}" class="list-group-item list-group-item-action bg-light">Profile</a>
                 <a href="{{ url_for('scanLibrary') }}" class="list-group-item list-group-item-action bg-light">Scan Library</a>
@@ -35,19 +35,21 @@
                     <a href="{{ url_for('searchLibrary') }}" class="list-group-item list-group-item-action bg-light">Search Songs</a>
                     <a href="{{ url_for('adminSettings') }}" class="list-group-item list-group-item-action bg-light">Admin Settings</a>
                     <a href="{{ url_for('manualImport') }}" class="list-group-item list-group-item-action bg-light">Import Song</a>
-                
+                    <a href="{{ url_for('adminNewUser') }}" class="list-group-item list-group-item-action bg-light">Add New User</a>
+                    <a href="{{ url_for('adminApproveUser') }}" class="list-group-item list-group-item-action bg-light">Approve New Users</a>
                 {% endif %}
-            {%else%}
-                <a href="{{ url_for('login') }}" class="list-group-item list-group-item-action bg-light">Login</a>
-            {% endif %}
+            
         </div>
     </div>
+    {% endif %}
+
     <!-- /#sidebar-wrapper -->
 
     <!-- Page Content -->
     <div id="page-content-wrapper">
 
         <!-- Top bar -->
+        {% if current_user.is_authenticated %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
             <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
 
@@ -64,9 +66,8 @@
                             {% set search_form = searchForm() %}
                             {{ search_form.csrf_token }}
                             {{ search_form.autocomp.label }}: {{ search_form.autocomp }}
-                            <p>
-                                <input type="submit" value="search">
-                            </p>
+                            <input type="submit" value="search">
+                            
                         </form>
                     </li>
 
@@ -81,6 +82,8 @@
             </div>
         </nav>
         <!-- End top bar -->
+        {% endif %}
+
 
         <div class="container-fluid">
             {% block content %} {% endblock %}

@@ -2,41 +2,22 @@
 
 {% block content %}
     <h1>{% block title %} Login {% endblock %}</h1>
+    {% from "_formhelpers.html" import render_field,show_errors %}
 
     <form method="POST" action="/">
         {{ form.csrf_token }}
         
-        
-        <p>
-            {{ form.username.label }}
-            {{ form.username(size=20) }}
-        </p>
+        {{show_errors()}}
 
-        {% if form.username.errors %}
-        <ul class="errors">
-            {% for error in form.username.errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+            {{ render_field(form.username) }}
 
-        <p>
-            {{ form.password.label }}
-            {{ form.password(size=20) }}
-        </p>
-
-        {% if form.password.errors %}
-        <ul class="errors">
-            {% for error in form.password.errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+            {{ render_field(form.password) }}
     
 
         <p>
             <input type="submit" value="Add">
         </p>
     </form>
+    <a href="{{url_for('signup')}}">Sign Up Here</a>
 
 {% endblock %}

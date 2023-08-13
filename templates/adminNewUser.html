@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} User Settings {% endblock %}</h1>
+
+
+{% from "_formhelpers.html" import render_field,show_errors %}
+<form method="POST" action="/newUser">
+    {{ form.csrf_token }}
+
+
+    {{show_errors()}}
+
+    {{ render_field(form.username) }}
+    {{ render_field(form.password) }}
+    {{ render_field(form.isAdmin) }}
+
+    <p>
+        <input type="submit" value="Add">
+    </p>
+</form>
+
+{% endblock %}
