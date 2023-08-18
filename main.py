@@ -14,8 +14,8 @@ from markupsafe import escape
 
 from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, AdminSignup, LoginForm, ModifyUser, SearchForm, SignupApprove, UserSignup, importForm, songForm
 from Lib.Python.MuseScoreHandler import DownloadMissing
-from Lib.Python.SongHandler import getSong, getSongID, updateSong
-from Lib.Python.Users import User, acceptSignups, addSignup, addUser, declineSignups, getUserSongs, removeUser, updateUserInfo, updateUserInfoAdmin, verifyUser
+from Lib.Python.SongHandler import getArtistSongs, getSong, getSongID, getTagSongs, updateSong
+from Lib.Python.Users import User, acceptSignups, addSignup, addUser, declineSignups, getUserSongs, getUserTags, removeUser, updateUserInfo, updateUserInfoAdmin, verifyUser
 from Lib.Python.YtHandler import searchUserLibrary
 from Lib.Python.environmentHandler import createDB, importSong, initialiseSettings, updateEnvironment
 
@@ -85,10 +85,31 @@ def logout():
 @login_required
 def autocomplete():
     songsRaw = getUserSongs(current_user.get_id())
-    songTitles=[]
+    autocomplete=[]
     for x in songsRaw:
-        songTitles.append(x[0])
-    return Response(json.dumps(songTitles), mimetype='application/json')
+        # Get song name
+        autocomplete.append(x[0])
+        
+        # Get Artist
+        if x[2] not in autocomplete:
+            autocomplete.append(x[2])
+
+    userTags = getUserTags(current_user.get_id())
+    for tag in userTags:
+        if tag[0] == None: continue
+        autocomplete.append(tag[0])
+
+    return Response(json.dumps(autocomplete), mimetype='application/json')
+
+@app.route('/_tagAutocomplete')
+@login_required
+def tagAutocomplete():
+    tags = []
+    userTags = getUserTags(current_user.get_id())
+    for tag in userTags:
+        if tag[0] == None: continue
+        tags.append(tag[0])
+    return Response(json.dumps(tags), mimetype='application/json')
 
 
 # This is the function for the login page
@@ -124,8 +145,9 @@ def signup():
 
 @app.route("/dashboard", methods=['GET', 'POST'])
 @login_required
-def dashboard():
-    songs = getUserSongs(current_user.get_id())
+def dashboard(songs = None):
+    if songs == None:
+        songs = getUserSongs(current_user.get_id())
     return render_template('dashboard.html', songs = songs)
 
 # This is where a user can modify their own settings
@@ -171,22 +193,32 @@ def downloadSong(filepath):
 def editSong(songID):
     songID = escape(songID)
     song = getSong(songID)
-    form = songForm(obj = song)
+    form = songForm(userID=current_user.get_id(), obj = song)
     if form.validate_on_submit():
-        updateSong(form)
+        updateSong(form, current_user.get_id())
         return app.redirect(url_for('viewSong', songID=songID))
     return render_template('songEdit.html', form = form, songID = songID)
 
 # This is used when searching for songs to redirect the user to the song page
+# This will also filter down songs that belong to a certain artist or tag
 @app.route("/findSong", methods=['GET','POST'])
 @login_required
 def findSong():
-    songName = request.form.get("autocomp")
+    searchField = request.form.get("autocomp")
     
-    songID = getSongID(songName) 
-
-    return redirect(url_for("viewSong", songID=songID))
-
+    songID = getSongID(searchField) 
+    # If the search was for a song it will redirect to the song page
+    if songID != None:
+        return redirect(url_for("viewSong", songID=songID))
+    
+    # If the search was for an artist, it will instead pass all songs belonging to that artist
+    artistSongs = getArtistSongs(searchField, current_user.get_id())
+    if artistSongs != None:
+        return render_template('dashboard.html', songs = artistSongs)
+    # If the search was for an tag, it will instead pass all songs belonging to that tag
+    tagSongs = getTagSongs(searchField, current_user.get_id())
+    if tagSongs != None:
+        return render_template('dashboard.html', songs = tagSongs)
 
 # ADMIN Pages
 

@@ -91,7 +91,19 @@ def getUserSongs(userID):
 
     return songs
 
+# Gets all the tags that a user has used
+def getUserTags(userID):
+    query = """
+        SELECT DISTINCT Tag FROM Catalog
+        WHERE UserID = ?
 
+    """
+
+    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    tags = conn.execute(query, (userID,)).fetchall()
+
+    return tags
+ 
 def getAllUsers():
     conn = sqlite3.connect('Lib\sql\musicSQL.db')
     users = conn.execute("SELECT UserId, userName from Users").fetchall()

@@ -11,7 +11,7 @@ from wtforms.widgets import PasswordInput, CheckboxInput, ListWidget
 from passlib.hash import pbkdf2_sha256
 
 from os import path
-from Lib.Python.SongHandler import getAllSongs
+from Lib.Python.SongHandler import getAllSongs, getSongTag
 from Lib.Python.Users import getAllUsers, getSignups
 
 from Lib.Python.environmentHandler import getImportSongs
@@ -145,6 +145,14 @@ class songForm(FlaskForm):
     msLink = StringField("Musescore Link")
     ytLink = StringField("Youtube Link")
     id= StringField()
+    tag= StringField("Song Tags", id='search_tagAutocomplete')
+
+
+    def __init__(self, userID, *args, **kwargs):
+        super(songForm, self).__init__(*args, **kwargs)
+        if self.tag.data == None:
+            self.tag.data = getSongTag(self.id.data, userID)
+        
 
 class importForm(FlaskForm):
     importFile = SelectField("File to be Imported")

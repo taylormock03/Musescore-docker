@@ -13,10 +13,25 @@
     {{ render_field(form.artist) }}
     {{ render_field(form.msLink) }}
     {{ render_field(form.ytLink) }}
-
+    {{ render_field(form.tag) }}
     <p>
         <input type="submit" value="Save">
     </p>
 </form>
+
+<script>
+
+$(function() {
+        $.ajax({
+            url: '{{ url_for("tagAutocomplete") }}'
+            }).done(function (data){
+                $('#search_tagAutocomplete').autocomplete({
+                    source: data,
+                    minLength: 0
+                });
+            });
+        });
+
+</script>
 
 {% endblock %}
