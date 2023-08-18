@@ -2,22 +2,20 @@
 
 {%block content%}
 
-<div>
+<div class='songThumbnail'>
     <img src="{{song.thumbnail}}">
     <h1> {{song.name}}</h1>
     <h2> {{song.artist}}</h2>
 
 </div>
 
-<div>
+<div class="songButtons">
     <a href="{{song.ytLink}}">Youtube link</a>
     {% if song.msLink is not none %}
         <a href="{{song.msLink}}">MuseScore link</a>
     {% endif %}
 
-</div>
-
-<div>
+    <br>
 
     <a href='{{url_for ("editSong", songID = song.id)}}'><button >Edit Details</button></a>
 

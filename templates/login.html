@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Login {% endblock %}</h1>
+<div class="frontPage">     
+<h1>{% block title %} Login {% endblock %}</h1>
     {% from "_formhelpers.html" import render_field,show_errors %}
 
     <form method="POST" action="/">
@@ -15,9 +16,10 @@
     
 
         <p>
-            <input type="submit" value="Add">
+            <input type="submit" value="Login">
         </p>
     </form>
     <a href="{{url_for('signup')}}">Sign Up Here</a>
+</div>
 
 {% endblock %}

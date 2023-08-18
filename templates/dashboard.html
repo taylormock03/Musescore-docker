@@ -11,15 +11,17 @@
 {% endwith %}
 <h1>Dashboard</h1>
 
-
+    <div class = 'flex-container'>
     {% for song in songs | sort(attribute="0") %}
-        <a href='{{url_for ("viewSong", songID = song[1])}}' class="SongIcon">
-        <div>
-            <img src={{song[-1]}}> </img>
-            <p> {{song[0]}} - {{song[2]}}</p>
-        </div>
-        </a>
-
+        <span class="songPanel">
+            <a href='{{url_for ("viewSong", songID = song[1])}}' class="SongIcon">
+            
+                <img src={{song[-1]}}> </img>
+                <h1>{{song[0]}}</h1> 
+                <h2>{{song[2]}}</h2>
+        
+            </a>
+        </span>
     {% endfor %}
-
+    </div>
 {% endblock %}
