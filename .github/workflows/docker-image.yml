@@ -16,6 +16,6 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: |
-        docker build . --file Dockerfile --tag musearr:$(date +%s)
-        docker run musearr:$(date +%s)
-        docker push musearr:$(date +%s)
+        docker build . --tag musearr:latest
+        docker run musearr:latest
+        docker push musearr:latest
