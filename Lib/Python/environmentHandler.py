@@ -18,7 +18,7 @@ def getImportDirectory():
 
 # Creates an empty data base with a default 'admin' user
 def createDB():
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     with open('Lib/sql/schema.sql') as f:
         conn.executescript(f.read())
     
@@ -57,7 +57,7 @@ def importSong(form):
     fileName= form.importFile.data
     songID= form.song.data
 
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     conn.execute('UPDATE Songs SET filePath= ? WHERE SongID = ?',
                         (fileName, songID ,))
     conn.commit()

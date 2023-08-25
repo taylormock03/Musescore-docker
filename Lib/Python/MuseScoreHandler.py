@@ -40,14 +40,14 @@ def downloadScore(urls):
 
 # This gets all songs that DON'T currently have a file associated with it
 def getMissingSongs():
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     
     return conn.execute('SELECT Name FROM Songs where filePath IS NULL').fetchall()
     # return [[("Howl's Moving Castle")]]
 
 
 def checkExistingURL(songName):
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     return conn.execute("SELECT MuseScoreLink from Songs where Name = ?",(songName,)).fetchone()
 
 # This searches musescore for a song that has the 
@@ -146,7 +146,7 @@ def DownloadMissing():
     print(returnList.items())
     # It also updates the SQL database so that the
     urls = []
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     for x in returnList.items():
 
             urls.append(x[1][0])
