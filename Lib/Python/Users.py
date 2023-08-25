@@ -184,6 +184,3 @@ def removeUser(id):
     
     conn.commit()
     conn.close()
-
-
-print(pbkdf2_sha256.hash("test"))
