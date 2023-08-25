@@ -20,7 +20,7 @@ def validate_password():
     message = 'Username or password is incorrect'
 
     def _sqlGetHash(username):
-        conn = sqlite3.connect('Lib/sql/musicSQL.db')
+        conn = sqlite3.connect('/db/musicSQL.db')
         return conn.execute('SELECT password FROM Users where UserName = ?',
                             (username,)).fetchone()
 
@@ -38,12 +38,12 @@ def validate_password():
 
 def validate_username():
     def _sqlGetUsername(username):
-        conn = sqlite3.connect('Lib/sql/musicSQL.db')
+        conn = sqlite3.connect('/db/musicSQL.db')
         return conn.execute('SELECT UserId FROM Users where UserName = ?',
                             (username,)).fetchone()
 
     def _sqlGetID(id):
-        conn = sqlite3.connect('Lib/sql/musicSQL.db')
+        conn = sqlite3.connect('/db/musicSQL.db')
         return conn.execute('SELECT UserName FROM Users where UserId = ?',
                             (id,)).fetchone()
 
