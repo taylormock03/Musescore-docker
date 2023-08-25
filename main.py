@@ -1,6 +1,7 @@
 from functools import wraps
 import json
 from os import path
+import os
 
 import secrets
 import sqlite3
@@ -33,6 +34,9 @@ else:
         file.write(secrets.token_hex(64))
     with open("secret", 'r') as key:
         app.config['SECRET_KEY'] = key.read()
+
+if not path.exists('Songs'):
+    os.mkdir("Songs")
 
 
 # initialise the login manager

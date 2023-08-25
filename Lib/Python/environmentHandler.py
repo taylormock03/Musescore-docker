@@ -64,7 +64,7 @@ def importSong(form):
     conn.close()
 
     fileOrigin = getImportDirectory() + "/" + fileName
-    shutil.move(fileOrigin, "Songs/" + fileName)
+    shutil.move(fileOrigin, "./Songs/" + fileName)
 
 
     return

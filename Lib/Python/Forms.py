@@ -130,8 +130,8 @@ class AdminGlobalRules(FlaskForm):
     importDirectory = StringField("Import Folder Path", validators=[Length(min=2), verifyFilePath()])
     def __init__(self, *args, **kwargs):
         super(AdminGlobalRules, self).__init__(*args, **kwargs)
-        if x:= getImportDirectory()!="NONE":
-            self.importDirectory.data = x
+        if getImportDirectory()!="NONE":
+            self.importDirectory.data = getImportDirectory()
 
 class AdminChooseUser(FlaskForm):
     userID = SelectField("User to edit")
