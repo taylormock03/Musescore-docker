@@ -36,7 +36,7 @@ def updateEnvironment(form):
         if x.name == 'csrf_token':
             continue
 
-        settings.append(x.name + "=" + x.data+'/n')
+        settings.append(x.name + "=" + x.data+'\n')
 
     with open("globalSettings",'w') as file:
         file.writelines(settings)
@@ -44,7 +44,8 @@ def updateEnvironment(form):
 # This returns a list of all files in the imports folder
 def getImportSongs():
     importDirectory = getImportDirectory()
-    return os.listdir(importDirectory)
+    if importDirectory!= "NONE":
+        return os.listdir(importDirectory)
         
 
 def importSong(form):
