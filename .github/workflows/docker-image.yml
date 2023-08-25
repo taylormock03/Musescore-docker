@@ -17,5 +17,5 @@ jobs:
     - name: Build the Docker image
       run: |
         docker build . --file Dockerfile --tag musearr:$(date +%s)
-        docker run . --file Dockerfile --tag musearr:$(date +%s)
-        docker push . --file Dockerfile --tag musearr:$(date +%s)
+        docker run musearr:$(date +%s)
+        docker push musearr:$(date +%s)
