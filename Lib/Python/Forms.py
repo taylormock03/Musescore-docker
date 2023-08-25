@@ -14,7 +14,7 @@ from os import path
 from Lib.Python.SongHandler import getAllSongs, getSongTag
 from Lib.Python.Users import getAllUsers, getSignups
 
-from Lib.Python.environmentHandler import getImportSongs
+from Lib.Python.environmentHandler import getImportDirectory, getImportSongs
 
 def validate_password():
     message = 'Username or password is incorrect'
@@ -128,6 +128,10 @@ class AdminModifyUser(ModifyUser):
 
 class AdminGlobalRules(FlaskForm):
     importDirectory = StringField("Import Folder Path", validators=[Length(min=2), verifyFilePath()])
+    def __init__(self, *args, **kwargs):
+        super(AdminGlobalRules, self).__init__(*args, **kwargs)
+        if x:= getImportDirectory()!="NONE":
+            self.importDirectory.data = x
 
 class AdminChooseUser(FlaskForm):
     userID = SelectField("User to edit")

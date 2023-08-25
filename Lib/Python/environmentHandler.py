@@ -6,12 +6,15 @@ from passlib.hash import pbkdf2_sha256
 from Lib.Python.Users import addUser
 
 def getImportDirectory():
-    with open("globalSettings",'r') as file:
-        for x in file.readlines():
-            if "importDirectory" in x:
-                importDirectory= x.split("=")[1]
-                importDirectory = importDirectory.strip()
-    return importDirectory
+    try:
+        with open("globalSettings",'r') as file:
+            for x in file.readlines():
+                if "importDirectory" in x:
+                    importDirectory= x.split("=")[1]
+                    importDirectory = importDirectory.strip()
+        return importDirectory
+    except:
+        return "NONE"
 
 # Creates an empty data base with a default 'admin' user
 def createDB():
