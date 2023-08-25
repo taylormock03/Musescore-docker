@@ -1,4 +1,10 @@
+# **/Songs
+# **/secret
+# **/globalSettings
+# **/sql
+**/imports
 **/__pycache__
+**/venv
 **/.venv
 **/.classpath
 **/.dockerignore
