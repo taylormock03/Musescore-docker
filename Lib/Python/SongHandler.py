@@ -41,7 +41,7 @@ def getAllSongs():
     query = """
         SELECT SongID, Name from Songs
     """
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     songs = conn.execute(query).fetchall()
 
     return songs
@@ -68,7 +68,7 @@ def getArtistSongs(artist, userID):
         AND Artist = ?
 '''
 
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     songs = conn.execute(query, (userID, artist)).fetchall()
 
     try: 
@@ -88,7 +88,7 @@ def getTagSongs(tag, userID):
             )
 '''
 
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     songs = conn.execute(query, (userID, tag)).fetchall()
 
     try: 
@@ -99,7 +99,7 @@ def getTagSongs(tag, userID):
         return None
     
 def getSongTag(songID, userID):
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     songs = conn.execute("SELECT Tag from Catalog where UserID = ? AND SongID = ?", (userID, songID)).fetchone()
     
     try:

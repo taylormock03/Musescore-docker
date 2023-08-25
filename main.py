@@ -40,7 +40,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Create the database if it doesn't exist
-if not path.exists('Lib\sql\musicSQL.db'):
+if not path.exists('Lib/sql/musicSQL.db'):
     createDB()
     
 
