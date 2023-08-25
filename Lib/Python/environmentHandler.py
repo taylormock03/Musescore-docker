@@ -48,7 +48,9 @@ def updateEnvironment(form):
 def getImportSongs():
     importDirectory = getImportDirectory()
     if importDirectory!= "NONE":
+        print(os.listdir(importDirectory))
         return os.listdir(importDirectory)
+    print("NONE")
         
 
 def importSong(form):
