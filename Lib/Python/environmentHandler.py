@@ -6,12 +6,15 @@ from passlib.hash import pbkdf2_sha256
 from Lib.Python.Users import addUser
 
 def getImportDirectory():
-    with open("globalSettings",'r') as file:
-        for x in file.readlines():
-            if "importDirectory" in x:
-                importDirectory= x.split("=")[1]
-                importDirectory = importDirectory.strip()
-    return importDirectory
+    try:
+        with open("globalSettings",'r') as file:
+            for x in file.readlines():
+                if "importDirectory" in x:
+                    importDirectory= x.split("=")[1]
+                    importDirectory = importDirectory.strip()
+        return importDirectory
+    except:
+        return "NONE"
 
 # Creates an empty data base with a default 'admin' user
 def createDB():
@@ -36,7 +39,7 @@ def updateEnvironment(form):
         if x.name == 'csrf_token':
             continue
 
-        settings.append(x.name + "=" + x.data+'/n')
+        settings.append(x.name + "=" + x.data+'\n')
 
     with open("globalSettings",'w') as file:
         file.writelines(settings)
@@ -44,7 +47,10 @@ def updateEnvironment(form):
 # This returns a list of all files in the imports folder
 def getImportSongs():
     importDirectory = getImportDirectory()
-    return os.listdir(importDirectory)
+    if importDirectory!= "NONE":
+        print(os.listdir(importDirectory))
+        return os.listdir(importDirectory)
+    print("NONE")
         
 
 def importSong(form):
@@ -58,7 +64,7 @@ def importSong(form):
     conn.close()
 
     fileOrigin = getImportDirectory() + "/" + fileName
-    shutil.move(fileOrigin, "Songs/" + fileName)
+    shutil.move(fileOrigin, "./Songs/" + fileName)
 
 
     return
