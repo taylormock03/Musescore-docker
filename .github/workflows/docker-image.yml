@@ -17,5 +17,4 @@ jobs:
     - name: Build the Docker image
       run: |
         docker build . --tag musearr:latest
-        docker run musearr:latest
         docker push musearr:latest
