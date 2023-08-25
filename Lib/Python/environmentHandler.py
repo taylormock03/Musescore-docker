@@ -15,8 +15,8 @@ def getImportDirectory():
 
 # Creates an empty data base with a default 'admin' user
 def createDB():
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
-    with open('Lib\sql\schema.sql') as f:
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    with open('Lib/sql/schema.sql') as f:
         conn.executescript(f.read())
     
     conn.commit()
@@ -36,7 +36,7 @@ def updateEnvironment(form):
         if x.name == 'csrf_token':
             continue
 
-        settings.append(x.name + "=" + x.data+'\n')
+        settings.append(x.name + "=" + x.data+'/n')
 
     with open("globalSettings",'w') as file:
         file.writelines(settings)
@@ -51,7 +51,7 @@ def importSong(form):
     fileName= form.importFile.data
     songID= form.song.data
 
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     conn.execute('UPDATE Songs SET filePath= ? WHERE SongID = ?',
                         (fileName, songID ,))
     conn.commit()

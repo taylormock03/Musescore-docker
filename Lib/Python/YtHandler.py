@@ -15,7 +15,7 @@ def searchUserLibrary(userId, playlistId):
         return
 
     print(playlist)
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     for song in playlist['tracks']:
         updateLibrary(userId, song, conn)
     conn.commit()

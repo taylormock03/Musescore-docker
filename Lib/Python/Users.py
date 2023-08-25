@@ -9,7 +9,7 @@ class User(UserMixin):
         self.loadUserInfo(identifier, id=identifier.isnumeric())
         
     def loadUserInfo(self, identifier, id):
-        conn = sqlite3.connect('Lib\sql\musicSQL.db')
+        conn = sqlite3.connect('Lib/sql/musicSQL.db')
 
         # change which field is being searched based on if 'username' is the username or id
         if id:
@@ -32,7 +32,7 @@ class User(UserMixin):
 
 def verifyUser(username, password):
     def _sqlGetHash(username):
-        conn = sqlite3.connect('Lib\sql\musicSQL.db')
+        conn = sqlite3.connect('Lib/sql/musicSQL.db')
         return conn.execute('SELECT password FROM Users where UserName = ?',
                         (username,)).fetchone()
 
@@ -51,7 +51,7 @@ def verifyUser(username, password):
 # This is for regular users who can modify their own data
 def updateUserInfo(currentUser, form):
 
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     conn.execute('UPDATE Users SET userName= ?, playListID = ? WHERE UserId = ?',
                         (form.username.data, form.playListID.data, currentUser,))
     conn.commit()
@@ -69,7 +69,7 @@ def updateUserInfoAdmin(form):
     else:
         isAdmin="FALSE"
 
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     conn.execute('UPDATE Users SET userName= ?, playListID = ?, isAdmin=?, password=? WHERE UserId = ?',
                         (form.username.data, form.playListID.data, isAdmin, passwordHash, form.id.data,))
     conn.commit()
@@ -86,7 +86,7 @@ def getUserSongs(userID):
             
             )
     """
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     songs = conn.execute(query, (userID,)).fetchall()
 
     return songs
@@ -99,20 +99,20 @@ def getUserTags(userID):
 
     """
 
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     tags = conn.execute(query, (userID,)).fetchall()
 
     return tags
  
 def getAllUsers():
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     users = conn.execute("SELECT UserId, userName from Users").fetchall()
     conn.close()
     return users
 
 # Create a new user
 def addUser(name, password, isAdmin=True):
-    conn=sqlite3.connect('Lib\sql\musicSQL.db')
+    conn=sqlite3.connect('Lib/sql/musicSQL.db')
     conn.execute("INSERT INTO Users(userName, password, isAdmin) VALUES (?,?,?)",
                  (name,
                   password,
@@ -124,7 +124,7 @@ def addUser(name, password, isAdmin=True):
 
 # Gets all the users who have signed up, but not yet been approved
 def getSignups():
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     users = conn.execute("Select userName FROM UserSignup").fetchall()
     conn.close()
     userNames = []
@@ -134,7 +134,7 @@ def getSignups():
     return userNames
 
 def acceptSignups(signups):
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     for newUser in signups:
         # Get the user's details
         name, password = conn.execute('Select userName, password FROM UserSignup WHERE userName= ?',
@@ -156,7 +156,7 @@ def acceptSignups(signups):
         
 
 def declineSignups(signups):
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     for newUser in signups:
         # remove them from the signup table
         conn.execute('DELETE FROM UserSignup WHERE userName=?',
@@ -169,7 +169,7 @@ def addSignup(form):
     name = form.username.data
     password =pbkdf2_sha256.hash(form.password.data)
 
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
     conn.execute("INSERT INTO UserSignup(username, password) VALUES (? , ?)",
                  (name, password))
     
@@ -177,13 +177,10 @@ def addSignup(form):
     conn.close()
 
 def removeUser(id):
-    conn = sqlite3.connect('Lib\sql\musicSQL.db')
+    conn = sqlite3.connect('Lib/sql/musicSQL.db')
 
     conn.execute('DELETE FROM Users WHERE UserId=?',
                      (id,))
     
     conn.commit()
     conn.close()
-
-
-print(pbkdf2_sha256.hash("test"))
