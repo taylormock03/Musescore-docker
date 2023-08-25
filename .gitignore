@@ -7,3 +7,4 @@ secret*
 globalSettings
 /imports
 /venv
+/db

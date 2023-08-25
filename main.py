@@ -2,6 +2,7 @@ from functools import wraps
 import json
 from os import path
 import os
+import logging
 
 import secrets
 import sqlite3
@@ -12,6 +13,7 @@ from flask import Flask, Response, request, render_template, redirect, url_for, 
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_wtf import CSRFProtect
 from markupsafe import escape
+from flask_apscheduler import APScheduler
 
 from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, AdminSignup, LoginForm, ModifyUser, SearchForm, SignupApprove, UserSignup, importForm, songForm
 from Lib.Python.MuseScoreHandler import DownloadMissing
@@ -20,7 +22,14 @@ from Lib.Python.Users import User, acceptSignups, addSignup, addUser, declineSig
 from Lib.Python.YtHandler import searchUserLibrary
 from Lib.Python.environmentHandler import createDB, importSong, initialiseSettings, updateEnvironment
 
+
+
 # Environment Initialisation
+# Allow for logging of events
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -75,6 +84,16 @@ def utility_processor():
     def searchForm():
         return SearchForm(request.form)
     return dict(searchForm=searchForm)
+
+# This will run tasks at pre-set times
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+@scheduler.task('interval', id="testFunc1", seconds=10)
+def testFunc():
+    logger.info("Test Function ran")
+
 # END initialisation
 
 
