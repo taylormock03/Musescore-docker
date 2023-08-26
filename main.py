@@ -57,7 +57,7 @@ if not path.exists('/db/musicSQL.db'):
     createDB()
     
 
-if not path.exists("globalSettings"):
+if not path.exists("/db/globalSettings"):
     initialiseSettings()
 
 
