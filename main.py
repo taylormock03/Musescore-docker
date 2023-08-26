@@ -337,6 +337,8 @@ def manualImport():
         flash("Importing...")
         importSong(form)
         flash("Success")
+        form = importForm()
+        return render_template('importSongs.html', form = form)
 
     return render_template('importSongs.html', form = form)
 
