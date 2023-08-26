@@ -62,3 +62,11 @@ def updateLibrary(userId, song, conn):
                       None,
                       ))
     return
+
+def searchAllUserLibraries():
+    conn = sqlite3.connect('/db/musicSQL.db')
+
+    x = conn.execute('SELECT UserId, playListID from Users').fetchall()
+
+    for user in x:
+        searchUserLibrary(user[0], user[1] )

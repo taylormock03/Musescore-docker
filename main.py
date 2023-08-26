@@ -19,7 +19,7 @@ from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules,
 from Lib.Python.MuseScoreHandler import DownloadMissing
 from Lib.Python.SongHandler import getArtistSongs, getSong, getSongID, getTagSongs, updateSong
 from Lib.Python.Users import User, acceptSignups, addSignup, addUser, declineSignups, getUserSongs, getUserTags, removeUser, updateUserInfo, updateUserInfoAdmin, verifyUser
-from Lib.Python.YtHandler import searchUserLibrary
+from Lib.Python.YtHandler import searchAllUserLibraries, searchUserLibrary
 from Lib.Python.environmentHandler import createDB, importSong, initialiseSettings, updateEnvironment
 
 
@@ -85,14 +85,22 @@ def utility_processor():
         return SearchForm(request.form)
     return dict(searchForm=searchForm)
 
+
 # This will run tasks at pre-set times
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-@scheduler.task('interval', id="testFunc1", seconds=10)
-def testFunc():
-    logger.info("Test Function ran")
+@scheduler.task('interval', id="ScanLibrary", days=1)
+def updateLibrary():
+    searchAllUserLibraries()
+    logger.info("User Libraries Updated")
+
+@scheduler.task('interval', id="SearchSongs", days=1)
+def updateLibrary():
+    logger.info("Starting Musescore Scrape")
+    searchAllUserLibraries()
+    logger.info("Scraped Musescore")
 
 # END initialisation
 

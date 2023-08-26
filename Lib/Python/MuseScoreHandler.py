@@ -97,7 +97,7 @@ def DownloadMissing():
     returnList = manager.dict()
     URLthreads = list()
 
-    # Returns a list of all songs in the database
+    # Returns a list of all songs in the database that don't have a file associated with them
     # NOTE: this is for all users, not just one
     songs = getMissingSongs()
     i=-1
@@ -114,13 +114,14 @@ def DownloadMissing():
         if existingUrl[0] !=None:
             returnList[i] = [existingUrl[0], None, x]
             continue
-
-        # This is where we try to get the URL if we have not previously gotten one 
-        try:
-            newThread = multiprocessing.Process(target=getSongURL, args = (returnList, x, i))
-            URLthreads.append(newThread)
-        except Exception as e:
-            print(e)
+        
+        else:
+            # This is where we try to get the URL if we have not previously gotten one 
+            try:
+                newThread = multiprocessing.Process(target=getSongURL, args = (returnList, x, i))
+                URLthreads.append(newThread)
+            except Exception as e:
+                print(e)
         
 
     # This limits the number of processes that are allowed to run at once
@@ -179,12 +180,13 @@ def DownloadMissing():
             
         conn.commit()
         i+=max_downloads
+        # by default songs are downloaded into the root directory
+        # This will move them into the "Songs" folder
         moveSongs()
     conn.close()
     
 
-    # by default songs are downloaded into the root directory
-    # This will move them into the "Songs" folder
+    
 
 if __name__ == '__main__':
     DownloadMissing()
