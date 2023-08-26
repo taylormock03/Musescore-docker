@@ -99,7 +99,7 @@ def updateLibrary():
 @scheduler.task('interval', id="SearchSongs", days=1)
 def updateLibrary():
     logger.info("Starting Musescore Scrape")
-    searchAllUserLibraries()
+    DownloadMissing(logger)
     logger.info("Scraped Musescore")
 
 # END initialisation
@@ -324,7 +324,7 @@ def searchLibrary():
     if not current_user.admin:
         abort(403)
     # Attemps to download all missing songs 
-    DownloadMissing()
+    DownloadMissing(logger)
     return redirect(url_for('dashboard'))
 
 @app.route("/import", methods=['GET', 'POST'])

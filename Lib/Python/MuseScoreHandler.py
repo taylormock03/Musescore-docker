@@ -90,7 +90,7 @@ def moveSongs():
         if fname.lower().endswith(".pdf"):
             shutil.move(os.path.join("./", fname), "./Songs")
 
-def DownloadMissing():
+def DownloadMissing(logger):
     # Create the thread queue and list
     manager = multiprocessing.Manager()
 
@@ -104,6 +104,7 @@ def DownloadMissing():
     # This is where we get the url of the song
     # It is an asyncrhronous function that looks for the 
     # song on musescore and passes back the url
+    logger.info("Getting Musescore Links")
     for x in songs:
         i+=1
         x = x[0]
@@ -120,8 +121,10 @@ def DownloadMissing():
             try:
                 newThread = multiprocessing.Process(target=getSongURL, args = (returnList, x, i))
                 URLthreads.append(newThread)
+                logger.info(f"Got URL for: {x}")
+
             except Exception as e:
-                print(e)
+                logger.warning(e)
         
 
     # This limits the number of processes that are allowed to run at once
@@ -168,7 +171,7 @@ def DownloadMissing():
     while i<len(urls):
         
         urlList = urls[i:min(i+max_downloads, len(urls)-1)]
-
+        logger.info(f"Downloading songs: {urlList}")
         paths = downloadScore(urlList)
 
         
