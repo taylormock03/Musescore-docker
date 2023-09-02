@@ -1,6 +1,5 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.11
-
+FROM ubuntu:22.04
 EXPOSE 5000
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -8,11 +7,20 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+# Install python
+RUN apt-get update
+RUN apt-get install -y python3 python3-pip nodejs npm
+
 # Install pip requirements
 COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
+RUN python3 -m pip install -r requirements.txt
 # RUN pip install -U hrequests[all]
-RUN python -m playwright install chromium
+RUN python3 -m playwright install chromium
+RUN playwright install-deps
+
+# install the musescore scraper
+RUN npm install -g dl-librescore
+
 
 WORKDIR /app
 COPY . /app
