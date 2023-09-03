@@ -21,6 +21,7 @@ import os
 # This is the musescore function that 
 # asynchronously downloads all scores passed to it
 def downloadScore(urls):
+    return
     # return os.system(f'npx dl-librescore -i {urls} -t pdf -o /app/Songs -v true')
     import subprocess
     result = subprocess.getoutput(f'npx dl-librescore -i {urls} -t pdf -o /app/Songs -v true')
@@ -167,8 +168,10 @@ def DownloadMissing(logger):
         logger.info(f"Downloading song: {urlList[0]}")
         paths = downloadScore(urlList[0])
         name = urlList[1]
-        conn.execute("UPDATE Songs SET filePath = ? WHERE Name =?",
-                    (paths, name))
+        
+        # Removed temporarily awaiting the bug fix from librescore
+        # conn.execute("UPDATE Songs SET filePath = ? WHERE Name =?",
+        #             (paths, name))
         
             
         conn.commit()
@@ -178,12 +181,6 @@ def DownloadMissing(logger):
         # This will move them into the "Songs" folder
         # moveSongs()
     conn.close()
-
-# def DownloadMissing(logger):
-    
-#     with hrequests.render('https://musescore.com/sheetmusic?instrument=2&instrumentation=114&sort=relevance&text=someone%20like%20you&type=non-official', 'https://musescore.com/sheetmusic?instrument=2&instrumentation=114&sort=relevance&text=shape%20of%20you&type=non-official') as page:
-#         logger.info(page.html.absolute_links)
-    
 
 
 if __name__ == '__main__':

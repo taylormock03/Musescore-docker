@@ -16,6 +16,7 @@ COPY requirements.txt .
 RUN python3 -m pip install -r requirements.txt
 # RUN pip install -U hrequests[all]
 RUN python3 -m playwright install chromium
+RUN playwright install
 RUN playwright install-deps
 
 # install the musescore scraper
