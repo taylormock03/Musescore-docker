@@ -16,7 +16,6 @@ COPY requirements.txt .
 RUN python3 -m pip install -r requirements.txt
 # RUN pip install -U hrequests[all]
 RUN python3 -m playwright install chromium
-RUN playwright install
 RUN playwright install-deps
 
 # install the musescore scraper
@@ -32,6 +31,7 @@ COPY . /app
 RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app && chown -R appuser /usr/local/lib
 USER appuser
 
+RUN playwright install
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "0", "main:app"]
 

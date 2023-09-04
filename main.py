@@ -156,7 +156,6 @@ def login():
         next = request.args.get('next')
         return app.redirect(next or app.url_for('dashboard'))
 
-        # return app.redirect(app.url_for("dashboard"))
 
     return render_template("login.html", form=form)
 

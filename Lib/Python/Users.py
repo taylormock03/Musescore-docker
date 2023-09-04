@@ -79,7 +79,7 @@ def updateUserInfoAdmin(form):
 def getUserSongs(userID):
 
     query = """
-        SELECT  Name, SongID, Artist, Thumbnail from Songs
+        SELECT * from Songs
         where SongID IN 
             (Select SongID from Catalog
             where UserID = ?
