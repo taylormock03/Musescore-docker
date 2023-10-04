@@ -2,8 +2,7 @@ import sqlite3
 from wsgiref.validate import validator
 from flask_wtf import FlaskForm
 from flask_wtf.form import _Auto
-from wtforms import (StringField, TextAreaField, IntegerField,
-                     BooleanField, RadioField, PasswordField, SelectField, 
+from wtforms import (StringField, BooleanField, PasswordField, SelectField, 
                      SelectMultipleField, SubmitField)
 from wtforms.validators import InputRequired, Length, ValidationError
 from wtforms.widgets import PasswordInput, CheckboxInput, ListWidget

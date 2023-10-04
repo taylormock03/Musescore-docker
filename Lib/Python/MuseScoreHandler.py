@@ -1,17 +1,9 @@
 import multiprocessing
 import os
 import sqlite3
-import threading
-import queue
-from bs4 import BeautifulSoup as bs4
-from pathlib import Path
-from musescore_scraper import AsyncMuseScraper
-from typing import Optional, List
-import asyncio
-from functools import partial
 import shutil
 import urllib.parse
-from requests_html import HTMLSession
+
 
 import hrequests
 import os
@@ -21,8 +13,6 @@ import os
 # This is the musescore function that 
 # asynchronously downloads all scores passed to it
 def downloadScore(urls):
-    return
-    # return os.system(f'npx dl-librescore -i {urls} -t pdf -o /app/Songs -v true')
     import subprocess
     result = subprocess.getoutput(f'npx dl-librescore -i {urls} -t pdf -o /app/Songs -v true')
     
@@ -170,8 +160,8 @@ def DownloadMissing(logger):
         name = urlList[1]
         
         # Removed temporarily awaiting the bug fix from librescore
-        # conn.execute("UPDATE Songs SET filePath = ? WHERE Name =?",
-        #             (paths, name))
+        conn.execute("UPDATE Songs SET filePath = ? WHERE Name =?",
+                    (paths, name))
         
             
         conn.commit()

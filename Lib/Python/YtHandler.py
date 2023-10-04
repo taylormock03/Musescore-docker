@@ -2,8 +2,6 @@ import sqlite3
 from flask import flash
 from ytmusicapi import YTMusic
 
-from Lib.Python.MuseScoreHandler import DownloadMissing
-
 # Syncs all the songs in the user's youtube playlist into database
 def searchUserLibrary(userId, playlistId):
     Yt = YTMusic()
