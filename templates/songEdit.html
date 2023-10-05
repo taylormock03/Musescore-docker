@@ -3,6 +3,28 @@
 {% block content %}
 <h1>{% block title %} User Settings {% endblock %}</h1>
 
+<script>   
+    $(function() {
+            $.ajax({
+                url: '{{ url_for("tagAutocomplete") }}'
+                }).done(function (data){
+                    $('#search_tagAutocomplete').autocomplete({
+                        source: data,
+                        minLength: 0
+                    });
+                });
+            });
+    function deleteSong(){
+                window.confirm("Are you sure you want to delete this song? This is irreversible!") ?
+                    window.location.href = "{{url_for ('deleteSong', songID=songID)}}" :
+                    null;
+            }
+    
+    window.onload=function(){ element = document.getElementById("deleteSong")
+    element.addEventListener("click", deleteSong)
+        }
+</script>
+
 {% from "_formhelpers.html" import render_field,show_errors %}
 <form method="POST" action="{{url_for ('editSong', songID=songID)}}">
     {{ form.csrf_token }}
@@ -16,22 +38,10 @@
     {{ render_field(form.tag) }}
     <p>
         <input type="submit" value="Save">
+        <button type="button" id="deleteSong">Delete Song</button>
     </p>
 </form>
 
-<script>
 
-$(function() {
-        $.ajax({
-            url: '{{ url_for("tagAutocomplete") }}'
-            }).done(function (data){
-                $('#search_tagAutocomplete').autocomplete({
-                    source: data,
-                    minLength: 0
-                });
-            });
-        });
-
-</script>
 
 {% endblock %}

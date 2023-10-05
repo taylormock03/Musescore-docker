@@ -59,7 +59,7 @@ def getSongID(name):
 
 def getArtistSongs(artist, userID):
     query = '''
-    SELECT  Name, SongID, Artist, Thumbnail from Songs
+    SELECT  * from Songs
         where SongID IN 
             (Select SongID from Catalog
             where UserID = ?
@@ -80,7 +80,7 @@ def getArtistSongs(artist, userID):
 
 def getTagSongs(tag, userID):
     query = '''
-    SELECT  Name, SongID, Artist, Thumbnail from Songs
+    SELECT * from Songs
         where SongID IN 
             (Select SongID from Catalog
             where UserID = ? AND Tag = ?
@@ -106,3 +106,12 @@ def getSongTag(songID, userID):
         return songs[0]
     except:
         return None
+    
+# Used to delete songs from the db
+def removeSong(songID):
+    conn = sqlite3.connect('/db/musicSQL.db')
+    conn.execute("DELETE FROM Songs WHERE SongID=?",(songID,))
+    conn.execute("DELETE FROM Catalog WHERE SongID=?",(songID,))
+    conn.commit()
+    conn.close()
+

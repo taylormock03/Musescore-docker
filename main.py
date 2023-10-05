@@ -15,7 +15,7 @@ from flask_apscheduler import APScheduler
 
 from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, AdminSignup, LoginForm, ModifyUser, SearchForm, SignupApprove, UserSignup, importForm, songForm
 from Lib.Python.MuseScoreHandler import DownloadMissing
-from Lib.Python.SongHandler import getArtistSongs, getSong, getSongID, getTagSongs, updateSong
+from Lib.Python.SongHandler import getArtistSongs, getSong, getSongID, getTagSongs, removeSong, updateSong
 from Lib.Python.Users import User, acceptSignups, addSignup, addUser, declineSignups, getUserSongs, getUserTags, removeUser, updateUserInfo, updateUserInfoAdmin, verifyUser
 from Lib.Python.YtHandler import searchAllUserLibraries, searchUserLibrary
 from Lib.Python.environmentHandler import createDB, importSong, initialiseSettings, updateEnvironment
@@ -117,7 +117,7 @@ def autocomplete():
     autocomplete=[]
     for x in songsRaw:
         # Get song name
-        autocomplete.append(x[0])
+        autocomplete.append(x[1])
         
         # Get Artist
         if x[2] not in autocomplete:
@@ -247,6 +247,14 @@ def findSong():
     tagSongs = getTagSongs(searchField, current_user.get_id())
     if tagSongs != None:
         return render_template('dashboard.html', songs = tagSongs)
+
+
+@app.route('/deleteSong/<songID>')
+@login_required
+def deleteSong(songID):
+    print(f"Deleting {songID}")
+    removeSong(songID)
+    return redirect(url_for("dashboard"))
 
 # ADMIN Pages
 

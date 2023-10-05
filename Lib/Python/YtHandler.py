@@ -29,8 +29,8 @@ def updateLibrary(userId, song, conn):
         return
 
     # Check if the song has already been stored by the songs table
-    songStored = conn.execute("SELECT SongID from Songs WHERE SongID = ?",
-                              (song['videoId'],)).fetchone()
+    songStored = conn.execute("SELECT SongID from Songs WHERE SongID = ? or (Name = ? AND Artist = ?)",
+                              (song['videoId'],song['title'], song['artists'][0]["name"])).fetchone()
 
     # insert the new song into the Songs table
     if songStored == None:
