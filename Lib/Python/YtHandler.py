@@ -2,8 +2,6 @@ import sqlite3
 from flask import flash
 from ytmusicapi import YTMusic
 
-from Lib.Python.MuseScoreHandler import DownloadMissing
-
 # Syncs all the songs in the user's youtube playlist into database
 def searchUserLibrary(userId, playlistId):
     Yt = YTMusic()
@@ -15,7 +13,7 @@ def searchUserLibrary(userId, playlistId):
         return
 
     print(playlist)
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     for song in playlist['tracks']:
         updateLibrary(userId, song, conn)
     conn.commit()
@@ -31,8 +29,8 @@ def updateLibrary(userId, song, conn):
         return
 
     # Check if the song has already been stored by the songs table
-    songStored = conn.execute("SELECT SongID from Songs WHERE SongID = ?",
-                              (song['videoId'],)).fetchone()
+    songStored = conn.execute("SELECT SongID from Songs WHERE SongID = ? or (Name = ? AND Artist = ?)",
+                              (song['videoId'],song['title'], song['artists'][0]["name"])).fetchone()
 
     # insert the new song into the Songs table
     if songStored == None:
@@ -62,3 +60,11 @@ def updateLibrary(userId, song, conn):
                       None,
                       ))
     return
+
+def searchAllUserLibraries():
+    conn = sqlite3.connect('/db/musicSQL.db')
+
+    x = conn.execute('SELECT UserId, playListID from Users').fetchall()
+
+    for user in x:
+        searchUserLibrary(user[0], user[1] )

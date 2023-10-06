@@ -1,10 +1,9 @@
-from functools import wraps
 import json
 from os import path
 import os
+import logging
 
 import secrets
-import sqlite3
 from passlib.hash import pbkdf2_sha256
 
 
@@ -12,15 +11,23 @@ from flask import Flask, Response, request, render_template, redirect, url_for, 
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_wtf import CSRFProtect
 from markupsafe import escape
+from flask_apscheduler import APScheduler
 
 from Lib.Python.Forms import AdminChooseUser, AdminModifyUser, AdminGlobalRules, AdminSignup, LoginForm, ModifyUser, SearchForm, SignupApprove, UserSignup, importForm, songForm
 from Lib.Python.MuseScoreHandler import DownloadMissing
-from Lib.Python.SongHandler import getArtistSongs, getSong, getSongID, getTagSongs, updateSong
+from Lib.Python.SongHandler import getArtistSongs, getSong, getSongID, getTagSongs, removeSong, updateSong
 from Lib.Python.Users import User, acceptSignups, addSignup, addUser, declineSignups, getUserSongs, getUserTags, removeUser, updateUserInfo, updateUserInfoAdmin, verifyUser
-from Lib.Python.YtHandler import searchUserLibrary
+from Lib.Python.YtHandler import searchAllUserLibraries, searchUserLibrary
 from Lib.Python.environmentHandler import createDB, importSong, initialiseSettings, updateEnvironment
 
+
+
 # Environment Initialisation
+# Allow for logging of events
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -44,11 +51,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Create the database if it doesn't exist
-if not path.exists('Lib/sql/musicSQL.db'):
+if not path.exists('/db/musicSQL.db'):
     createDB()
     
 
-if not path.exists("globalSettings"):
+if not path.exists("/db/globalSettings"):
     initialiseSettings()
 
 
@@ -75,6 +82,24 @@ def utility_processor():
     def searchForm():
         return SearchForm(request.form)
     return dict(searchForm=searchForm)
+
+
+# This will run tasks at pre-set times
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+@scheduler.task('interval', id="ScanLibrary", days=1)
+def updateLibrary():
+    searchAllUserLibraries()
+    logger.info("User Libraries Updated")
+
+@scheduler.task('interval', id="SearchSongs", days=1)
+def updateLibrary():
+    logger.info("Starting Musescore Scrape")
+    DownloadMissing(logger)
+    logger.info("Scraped Musescore")
+
 # END initialisation
 
 
@@ -92,7 +117,7 @@ def autocomplete():
     autocomplete=[]
     for x in songsRaw:
         # Get song name
-        autocomplete.append(x[0])
+        autocomplete.append(x[1])
         
         # Get Artist
         if x[2] not in autocomplete:
@@ -129,7 +154,6 @@ def login():
         next = request.args.get('next')
         return app.redirect(next or app.url_for('dashboard'))
 
-        # return app.redirect(app.url_for("dashboard"))
 
     return render_template("login.html", form=form)
 
@@ -224,6 +248,14 @@ def findSong():
     if tagSongs != None:
         return render_template('dashboard.html', songs = tagSongs)
 
+
+@app.route('/deleteSong/<songID>')
+@login_required
+def deleteSong(songID):
+    print(f"Deleting {songID}")
+    removeSong(songID)
+    return redirect(url_for("dashboard"))
+
 # ADMIN Pages
 
 @app.route("/adminSettings")
@@ -297,7 +329,7 @@ def searchLibrary():
     if not current_user.admin:
         abort(403)
     # Attemps to download all missing songs 
-    DownloadMissing()
+    DownloadMissing(logger)
     return redirect(url_for('dashboard'))
 
 @app.route("/import", methods=['GET', 'POST'])
@@ -310,6 +342,8 @@ def manualImport():
         flash("Importing...")
         importSong(form)
         flash("Success")
+        form = importForm()
+        return render_template('importSongs.html', form = form)
 
     return render_template('importSongs.html', form = form)
 

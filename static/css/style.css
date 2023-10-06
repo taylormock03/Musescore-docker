@@ -124,3 +124,9 @@
   border-style: outset;
   border-width: 5px;
  }
+
+ input[type='checkbox']{
+  padding:10px;
+  margin-right: 5px;
+  margin-left: 10px;
+ }

@@ -10,18 +10,81 @@
     {% endif %}
 {% endwith %}
 <h1>Dashboard</h1>
+    <input type="checkbox" id="hideMusescore">Hide missing Musescore links</input>
+    <input type="checkbox" id="hideYT">Hide missing Youtube links</input>
+    <input type="checkbox" id="hideFile">Hide missing Files</input>
+    <input type="checkbox" id="showMusescore">Show missing Musescore links</input>
+    <input type="checkbox" id="showYT">Show missing Youtube links</input>
+    <input type="checkbox" id="show File">Show missing Files</input>
 
     <div class = 'flex-container'>
-    {% for song in songs | sort(attribute="0") %}
-        <span class="songPanel">
-            <a href='{{url_for ("viewSong", songID = song[1])}}' class="SongIcon">
+    {% for song in songs | sort(attribute="1") %}
+        <span class="songPanel {% if song[3]==None %}NoMusescoreLink {% else %} MusescoreLink{% endif %} {% if song[4]==None %}NoYtLink {% else %} YTLink{% endif %} {% if song[6]==None %}NoFile {% else %} File{% endif %}" >
+            <a href='{{url_for ("viewSong", songID = song[0])}}' class="SongIcon">
             
-                <img src={{song[-1]}}> </img>
-                <h1>{{song[0]}}</h1> 
+                <img src={{song[5]}}> </img>
+                <h1>{{song[1]}}</h1> 
                 <h2>{{song[2]}}</h2>
         
             </a>
         </span>
     {% endfor %}
     </div>
+
+    <script>
+
+        $("#hideMusescore").click(function () {
+            if ($(this).is(":checked")) {
+                
+                $(".NoMusescoreLink").hide();
+            } else {
+                $('.NoMusescoreLink').show();
+            }
+        });
+
+        $("#hideYT").click(function () {
+            if ($(this).is(":checked")) {
+                
+                $(".NoYtLink").hide();
+            } else {
+                $('.NoYtLink').show();
+            }
+        });
+
+        $("#hideFile").click(function () {
+            if ($(this).is(":checked")) {
+                
+                $(".NoFile").hide();
+            } else {
+                $('.NoFile').show();
+            }
+        });
+
+        $("#showMusescore").click(function () {
+            if ($(this).is(":checked")) {
+                
+                $(".MusescoreLink").hide();
+            } else {
+                $('.MusescoreLink').show();
+            }
+        });
+
+        $("#showYT").click(function () {
+            if ($(this).is(":checked")) {
+                
+                $(".YtLink").hide();
+            } else {
+                $('.YtLink').show();
+            }
+        });
+
+        $("#showFile").click(function () {
+            if ($(this).is(":checked")) {
+                
+                $(".File").hide();
+            } else {
+                $('.File').show();
+            }
+        });
+        </script>
 {% endblock %}

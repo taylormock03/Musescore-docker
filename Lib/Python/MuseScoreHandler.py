@@ -1,53 +1,39 @@
 import multiprocessing
 import os
 import sqlite3
-import threading
-import queue
-from bs4 import BeautifulSoup as bs4
-from pathlib import Path
-from musescore_scraper import AsyncMuseScraper
-from typing import Optional, List
-import asyncio
-from functools import partial
 import shutil
 import urllib.parse
-from requests_html import HTMLSession
+
+
+import hrequests
+import os
+
 
 
 # This is the musescore function that 
 # asynchronously downloads all scores passed to it
 def downloadScore(urls):
+    import subprocess
+    result = subprocess.getoutput(f'npx dl-librescore -i {urls} -t pdf -o /app/Songs -v true')
+    
+    idx1 = result.index('/app/Songs/')
+    idx2 = result.index('\n✔')
+    res = ''
+    for idx in range(idx1 + len('/app/Songs/'), idx2):
+        res = res + result[idx]
 
-    outputs: List[Optional[Path]] = [None] * len(urls)
-    def set_output(i: int, task: asyncio.Task) -> None:
-        outputs[i] = task.result()
-
-    async def run():
-        tasks: List[asyncio.Task] = []
-
-        async with AsyncMuseScraper() as ms:
-            for i in range(len(urls)):
-                task: asyncio.Task = asyncio.create_task(ms.to_pdf(urls[i]))
-                task.add_done_callback(partial(set_output, i))
-                tasks.append(task)
-
-            result = await asyncio.gather(*tasks)
-
-        return result
-
-
-    return asyncio.get_event_loop().run_until_complete(run())
+    return res
 
 # This gets all songs that DON'T currently have a file associated with it
 def getMissingSongs():
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     
     return conn.execute('SELECT Name FROM Songs where filePath IS NULL').fetchall()
     # return [[("Howl's Moving Castle")]]
 
 
 def checkExistingURL(songName):
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     return conn.execute("SELECT MuseScoreLink from Songs where Name = ?",(songName,)).fetchone()
 
 # This searches musescore for a song that has the 
@@ -62,25 +48,23 @@ def getSongURL(returnDict, songName, i):
     searchURL = "https://musescore.com/sheetmusic?instrument=2&instrumentation=114&sort=relevance&text=" + urllib.parse.quote(songName, safe='') + "&type=non-official"
 
     # This is able to render the JS musescore requires
-    session = HTMLSession()
-    r = session.get(searchURL)
-    r.html.render(timeout=15)
-    if "No results for" in r.html.text:
-        return
-    
-    response = r.html.find('a', first=False)
+    with hrequests.render(searchURL) as page:
 
-    r.close()
-    links = []
-    for link in response:
-        url = list(link.absolute_links)[0]
-        if ('user' in url and 'scores' in url):
-                    links.append(url)
+        if "No results for" in page.html.text:
+            return
+        
+        response = page.html.find_all('a')
+
+        links = []
+        for link in response:
+            url = list(link.absolute_links)[0]
+            if ('user' in url and 'scores' in url):
+                        links.append(url)
 
 
 
-    if len(links)>0:
-        returnDict[i]=[links[0], searchURL, songName]
+        if len(links)>0:
+            returnDict[i]=[links[0], searchURL, songName]
 
 
 def moveSongs():
@@ -90,20 +74,21 @@ def moveSongs():
         if fname.lower().endswith(".pdf"):
             shutil.move(os.path.join("./", fname), "./Songs")
 
-def DownloadMissing():
+def DownloadMissing(logger):
     # Create the thread queue and list
     manager = multiprocessing.Manager()
 
     returnList = manager.dict()
     URLthreads = list()
 
-    # Returns a list of all songs in the database
+    # Returns a list of all songs in the database that don't have a file associated with them
     # NOTE: this is for all users, not just one
     songs = getMissingSongs()
     i=-1
     # This is where we get the url of the song
     # It is an asyncrhronous function that looks for the 
     # song on musescore and passes back the url
+    logger.info("Getting Musescore Links")
     for x in songs:
         i+=1
         x = x[0]
@@ -114,13 +99,16 @@ def DownloadMissing():
         if existingUrl[0] !=None:
             returnList[i] = [existingUrl[0], None, x]
             continue
+        
+        else:
+            # This is where we try to get the URL if we have not previously gotten one 
+            try:
+                newThread = multiprocessing.Process(target=getSongURL, args = (returnList, x, i))
+                URLthreads.append(newThread)
+                logger.info(f"Got URL for: {x}")
 
-        # This is where we try to get the URL if we have not previously gotten one 
-        try:
-            newThread = multiprocessing.Process(target=getSongURL, args = (returnList, x, i))
-            URLthreads.append(newThread)
-        except Exception as e:
-            print(e)
+            except Exception as e:
+                logger.warning(e)
         
 
     # This limits the number of processes that are allowed to run at once
@@ -146,10 +134,10 @@ def DownloadMissing():
     print(returnList.items())
     # It also updates the SQL database so that the
     urls = []
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     for x in returnList.items():
 
-            urls.append(x[1][0])
+            urls.append([x[1][0],x[1][2]])
 
             # This adds the musescore link to the database.
             # This is done so that in case the connection is later 
@@ -161,30 +149,29 @@ def DownloadMissing():
 
     # This is an asynchronous function that 
     # will download multiple songs at once
-    max_downloads = 5
+
     i=0
-    j = 0
+
     while i<len(urls):
         
-        urlList = urls[i:min(i+max_downloads, len(urls)-1)]
-
-        paths = downloadScore(urlList)
-
+        urlList = urls[i]
+        logger.info(f"Downloading song: {urlList[0]}")
+        paths = downloadScore(urlList[0])
+        name = urlList[1]
         
-        for x in paths:
-            items = returnList.items()
-            conn.execute("UPDATE Songs SET filePath = ?, MuseScoreLink = ? WHERE Name =?",
-                        (x.stem+".pdf", items[j][1][0], items[j][1][2]))
-            j+=1
+        # Removed temporarily awaiting the bug fix from librescore
+        conn.execute("UPDATE Songs SET filePath = ? WHERE Name =?",
+                    (paths, name))
+        
             
         conn.commit()
-        i+=max_downloads
-        moveSongs()
-    conn.close()
-    
+        i+=1
 
-    # by default songs are downloaded into the root directory
-    # This will move them into the "Songs" folder
+        # by default songs are downloaded into the root directory
+        # This will move them into the "Songs" folder
+        # moveSongs()
+    conn.close()
+
 
 if __name__ == '__main__':
     DownloadMissing()

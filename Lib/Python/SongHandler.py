@@ -2,7 +2,7 @@ import sqlite3
 
 # returns an object with the song's data
 def getSong(id):
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     info = conn.execute("select * from Songs where SongID = ?",
                         (id,)).fetchone()
     
@@ -19,7 +19,7 @@ def getSong(id):
     return Song(info)
 
 def updateSong(form, userID):
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     
     conn.execute("UPDATE Songs Set Name = ?, Artist = ?, MuseScoreLink = ?, YoutubeLink = ? WHERE SongID = ?",
                  (form.name.data,
@@ -41,14 +41,14 @@ def getAllSongs():
     query = """
         SELECT SongID, Name from Songs
     """
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     songs = conn.execute(query).fetchall()
 
     return songs
 
 
 def getSongID(name):
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     info = conn.execute("select SongID from Songs where Name = ?",
                         (name,)).fetchone()
     try:
@@ -59,7 +59,7 @@ def getSongID(name):
 
 def getArtistSongs(artist, userID):
     query = '''
-    SELECT  Name, SongID, Artist, Thumbnail from Songs
+    SELECT  * from Songs
         where SongID IN 
             (Select SongID from Catalog
             where UserID = ?
@@ -68,7 +68,7 @@ def getArtistSongs(artist, userID):
         AND Artist = ?
 '''
 
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     songs = conn.execute(query, (userID, artist)).fetchall()
 
     try: 
@@ -80,7 +80,7 @@ def getArtistSongs(artist, userID):
 
 def getTagSongs(tag, userID):
     query = '''
-    SELECT  Name, SongID, Artist, Thumbnail from Songs
+    SELECT * from Songs
         where SongID IN 
             (Select SongID from Catalog
             where UserID = ? AND Tag = ?
@@ -88,7 +88,7 @@ def getTagSongs(tag, userID):
             )
 '''
 
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     songs = conn.execute(query, (userID, tag)).fetchall()
 
     try: 
@@ -99,10 +99,19 @@ def getTagSongs(tag, userID):
         return None
     
 def getSongTag(songID, userID):
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     songs = conn.execute("SELECT Tag from Catalog where UserID = ? AND SongID = ?", (userID, songID)).fetchone()
     
     try:
         return songs[0]
     except:
         return None
+    
+# Used to delete songs from the db
+def removeSong(songID):
+    conn = sqlite3.connect('/db/musicSQL.db')
+    conn.execute("DELETE FROM Songs WHERE SongID=?",(songID,))
+    conn.execute("DELETE FROM Catalog WHERE SongID=?",(songID,))
+    conn.commit()
+    conn.close()
+

@@ -2,8 +2,7 @@ import sqlite3
 from wsgiref.validate import validator
 from flask_wtf import FlaskForm
 from flask_wtf.form import _Auto
-from wtforms import (StringField, TextAreaField, IntegerField,
-                     BooleanField, RadioField, PasswordField, SelectField, 
+from wtforms import (StringField, BooleanField, PasswordField, SelectField, 
                      SelectMultipleField, SubmitField)
 from wtforms.validators import InputRequired, Length, ValidationError
 from wtforms.widgets import PasswordInput, CheckboxInput, ListWidget
@@ -20,7 +19,7 @@ def validate_password():
     message = 'Username or password is incorrect'
 
     def _sqlGetHash(username):
-        conn = sqlite3.connect('Lib/sql/musicSQL.db')
+        conn = sqlite3.connect('/db/musicSQL.db')
         return conn.execute('SELECT password FROM Users where UserName = ?',
                             (username,)).fetchone()
 
@@ -38,12 +37,12 @@ def validate_password():
 
 def validate_username():
     def _sqlGetUsername(username):
-        conn = sqlite3.connect('Lib/sql/musicSQL.db')
+        conn = sqlite3.connect('/db/musicSQL.db')
         return conn.execute('SELECT UserId FROM Users where UserName = ?',
                             (username,)).fetchone()
 
     def _sqlGetID(id):
-        conn = sqlite3.connect('Lib/sql/musicSQL.db')
+        conn = sqlite3.connect('/db/musicSQL.db')
         return conn.execute('SELECT UserName FROM Users where UserId = ?',
                             (id,)).fetchone()
 
@@ -164,8 +163,11 @@ class importForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(importForm, self).__init__(*args, **kwargs)
-        self.song.choices= getAllSongs()
+        
         self.importFile.choices = getImportSongs()
+        sortedSongs = getAllSongs()
+        sortedSongs = sorted(sortedSongs, key=lambda x: x[1])
+        self.song.choices= sortedSongs
 
 class SearchForm(FlaskForm):
     autocomp = StringField('Search Song', id='search_autocomplete')

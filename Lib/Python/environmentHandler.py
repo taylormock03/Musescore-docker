@@ -7,7 +7,7 @@ from Lib.Python.Users import addUser
 
 def getImportDirectory():
     try:
-        with open("globalSettings",'r') as file:
+        with open("/db/globalSettings",'r') as file:
             for x in file.readlines():
                 if "importDirectory" in x:
                     importDirectory= x.split("=")[1]
@@ -18,7 +18,7 @@ def getImportDirectory():
 
 # Creates an empty data base with a default 'admin' user
 def createDB():
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     with open('Lib/sql/schema.sql') as f:
         conn.executescript(f.read())
     
@@ -30,7 +30,7 @@ def createDB():
 def initialiseSettings():
     settings=["importDirectory=NONE"]
 
-    with open("globalSettings",'w') as file:
+    with open("/db/globalSettings",'w') as file:
         file.writelines(settings)
 
 def updateEnvironment(form):
@@ -41,7 +41,7 @@ def updateEnvironment(form):
 
         settings.append(x.name + "=" + x.data+'\n')
 
-    with open("globalSettings",'w') as file:
+    with open("/db/globalSettings",'w') as file:
         file.writelines(settings)
 
 # This returns a list of all files in the imports folder
@@ -57,7 +57,7 @@ def importSong(form):
     fileName= form.importFile.data
     songID= form.song.data
 
-    conn = sqlite3.connect('Lib/sql/musicSQL.db')
+    conn = sqlite3.connect('/db/musicSQL.db')
     conn.execute('UPDATE Songs SET filePath= ? WHERE SongID = ?',
                         (fileName, songID ,))
     conn.commit()
